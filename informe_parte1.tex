@@ -22,7 +22,7 @@
     \textbf{Sistemas de Control}\\
     \large Trabajo de Laboratorio Integrador: Modelado y Simulación
 }
-\author{Tomás Gómez Pizarro}
+\author{Tomás Gómez Pizarro \quad\and\quad Mikael Rodríguez}
 \date{Octubre 2026}
 
 \begin{document}
@@ -106,16 +106,15 @@ Comparando el denominador con la forma canónica $s^2 + 2\xi\omega_n s + \omega_
     \omega_n &= \sqrt{\frac{1+k}{\tau_1 \tau_2}} = \sqrt{255319,15} \approx 505,29\text{ rad/s} \\
     \xi &= \frac{1/\tau_1 + 1/\tau_2}{2\omega_n} = \frac{312,77}{2 \cdot 505,29} \approx 0,3095
 \end{align}
-\textbf{Influencia de $k$:} Al aumentar $k$, la frecuencia natural $\omega_n$ aumenta ($\propto \sqrt{1+k}$), haciendo más rápida la respuesta inicial, mientras que el amortiguamiento $\xi$ disminuye ($\propto 1/\sqrt{1+k}$), provocando mayores oscilaciones y un mayor sobrepaso ($PO$). Sin embargo, la atenuación $\sigma = \xi\omega_n = \frac{1}{2}\left(\frac{1}{\tau_1} + \frac{1}{\tau_2}\right) = 156,38\text{ s}^{-1}$ no depende de $k$, por lo que el tiempo de establecimiento $T_s$ se mantiene prácticamente constante. Además, un mayor $k$ acerca la ganancia estacionaria $\frac{k}{1+k}$ a $1$, reduciendo el error permanente.
+\textbf{Influencia de $k$:} Al aumentar $k$, la frecuencia natural $\omega_n$ aumenta ($\propto \sqrt{1+k}$), haciendo más rápida la respuesta inicial, mientras que el amortiguamiento $\xi$ disminuye ($\propto 1/\sqrt{1+k}$), provocando mayores oscilaciones y un mayor sobrepaso ($PO$). Sin embargo, el producto $\xi\omega_n = \frac{1}{2}\left(\frac{1}{\tau_1} + \frac{1}{\tau_2}\right) = 156,38\text{ s}^{-1}$ (parte real de los polos de lazo cerrado) no depende de $k$, por lo que el tiempo de establecimiento $T_s \approx \frac{4}{\xi\omega_n}$ se mantiene prácticamente constante. Además, un mayor $k$ acerca la ganancia estacionaria $\frac{k}{1+k}$ a $1$, reduciendo el error permanente.
 
 \subsection{Función de $R_6$ y del seguidor $U_{3A}$}
 \begin{itemize}
-    \item \textbf{Resistencia $R_6$:} En la práctica los operacionales reales no son perfectamente ideales y tienen pequeñas corrientes internas en sus entradas; $R_6$ se coloca para balancear esas imperfecciones y evitar tensiones de desbalance (\textit{offset}) a la salida. En el análisis teórico, como asumimos un operacional ideal donde no entra corriente ($I_- = 0$), en $R_6$ no hay caída de tensión ($\Delta V_{R_6} = 0$), por lo que $V_- = V_{\text{out},U3A}$ y no afecta la función de transferencia.
-    \item \textbf{Seguidor $U_{3A}$ y efecto de suprimirlo:} Su función es aislar ambas etapas (\textit{buffer}). Como tiene impedancia de entrada casi infinita y de salida nula, evita que la segunda red $R_2 C_2$ le robe corriente al capacitor $C_1$ (efecto de carga), permitiendo que la transferencia sea simplemente el producto $\text{Sys}_1(s) \cdot \text{Sys}_2(s)$. Si elimináramos $U_{3A}$ conectando $R_2$ directamente sobre $C_1$, las dos redes interactuarían entre sí y aparecería un término cruzado $R_1 C_2 s$ en el denominador:
+    \item \textbf{Resistencia $R_6$:} En un circuito real se coloca para igualar la resistencia vista por ambas entradas del operacional y compensar las pequeñas corrientes de entrada del dispositivo. En el modelo ideal, como no ingresa corriente al terminal inversor ($I_- = 0$), no hay caída de tensión en $R_6$ ($\Delta V_{R_6} = 0$) y equivale a un cable directo, razón por la cual no aparece en la función de transferencia.
+    \item \textbf{Seguidor $U_{3A}$ y su eliminación:} Gracias a su alta impedancia de entrada, aísla ambas etapas sin tomar corriente de $C_1$, permitiendo obtener la planta simplemente multiplicando los bloques individuales $\text{Sys}_1(s) \cdot \text{Sys}_2(s)$. Si se eliminara $U_{3A}$ conectando $R_2$ directamente sobre $C_1$, la segunda etapa $RC$ cargaría a la primera (derivando corriente de $C_1$ hacia $R_2$) y ya no podrían modelarse como dos bloques independientes en cascada, apareciendo un término de acoplamiento $R_1 C_2 s$ en el denominador:
     \begin{equation}
-        G_{\text{sin buffer}}(s) = \frac{k}{\tau_1 \tau_2 s^2 + (\tau_1 + \tau_2 + R_1 C_2)s + 1}
+        G_{\text{sin seguidor}}(s) = \frac{k}{\tau_1 \tau_2 s^2 + (\tau_1 + \tau_2 + R_1 C_2)s + 1}
     \end{equation}
-    lo que correría los polos de la planta, volviendo al sistema más lento y cambiando su amortiguamiento.
 \end{itemize}
 
 \section{Respuesta al escalón de $\text{Sys}_f$ ($k = 11$)}
@@ -141,10 +140,20 @@ Los parámetros principales de desempeño son:
     \begin{equation}
         T_s \approx \frac{4}{\xi\omega_n} = \frac{4}{156,38} \approx 25,58\text{ ms}
     \end{equation}
-    \item \textbf{Tiempo de subida ($t_r$):}
+    \item \textbf{Tiempo de subida ($t_r$, criterio del $10\%$ al $90\%$):}
     \begin{equation}
-        t_r = \frac{\pi - \beta}{\omega_d} = \frac{\pi - 1,256}{480,48} \approx 3,92\text{ ms}
+        t_r \approx \frac{2,16\,\xi + 0,6}{\omega_n} = \frac{2,16 \cdot 0,3095 + 0,6}{505,29} \approx 2,51\text{ ms} \quad (\text{valor exacto } 10\%\text{--}90\%\text{: } 2,57\text{ ms})
     \end{equation}
+\end{itemize}
+
+\paragraph{Verificación por simulación en MATLAB:}
+A partir de la simulación temporal del modelo en MATLAB ante un escalón de $1\text{ V}$, se obtienen los siguientes parámetros de respuesta:
+\begin{itemize}
+    \item \textbf{Valor final:} $y(\infty) = 0,9167\text{ V}$ (coincidencia exacta con el valor analítico $11/12\text{ V}$).
+    \item \textbf{Sobrepaso porcentual:} $PO = 35,97\%$ (coincide exactamente con el valor teórico analítico).
+    \item \textbf{Tiempo de pico:} $T_p = 6,50\text{ ms}$ (en excelente concordancia con los $6,54\text{ ms}$ teóricos).
+    \item \textbf{Tiempo de establecimiento ($2\%$):} $T_s = 22,23\text{ ms}$ (instante en que la curva entra y se mantiene en la banda del $\pm 2\%$, frente a la cota teórica conservativa de envolvente $4/(\xi\omega_n) = 25,58\text{ ms}$).
+    \item \textbf{Tiempo de subida ($10\%$--$90\%$):} $t_r = 2,57\text{ ms}$ (concordante con la aproximación analítica de $2,51\text{ ms}$).
 \end{itemize}
 
 \section{Error en estado estacionario}
@@ -166,15 +175,21 @@ Como $G(s)$ no posee polos en el origen ($N = 0$), el sistema es de \textbf{Tipo
     Al no tener un integrador en lazo abierto, el sistema no puede seguir una entrada en rampa y el error crece indefinidamente con el tiempo.
 \end{itemize}
 
-\section{Respuesta para distintos valores de $k$ (serie E24)}
-Para realizar la ganancia $k = 1 + \frac{R_7}{R_9}$ con resistencias comerciales de la serie E24 en el rango de $1\text{ k}\Omega$ a $100\text{ k}\Omega$, fijamos $R_9 = 1\text{ k}\Omega$ y calculamos $R_7 = (k - 1)R_9$:
+\paragraph{Comprobación por simulación en MATLAB:}
 \begin{itemize}
-    \item \textbf{$k = 1$:} Se reemplaza $R_7$ por un puente directo ($R_7 = 0\,\Omega$) y se puede desconectar $R_9$ ($R_9 \to \infty$), quedando $U_{2A}$ como seguidor de tensión con $k_{\text{ef}} = 1$.
+    \item \textbf{Escalón unitario:} Simulando la respuesta temporal de la señal de error en MATLAB, el valor final en régimen permanente converge a $e_{ss,\text{sim}} = 0,0833\text{ V} = 1/12\text{ V}$, coincidiendo exactamente con el cálculo teórico.
+    \item \textbf{Rampa unitaria ($r(t) = t$):} Al simular la respuesta del sistema frente a una entrada en rampa unitaria, se evalúa la evolución temporal del error $e(t) = r(t) - y(t)$. Como el sistema es de Tipo 0, la salida sigue a la rampa con una ganancia inferior a la unidad ($\frac{k}{1+k} = \frac{11}{12}\text{ V/s}$), por lo que el error crece linealmente de forma indefinida a una tasa de $\left(1 - \frac{11}{12}\right) = \frac{1}{12}\text{ V/s} \approx 0,0833\text{ V/s}$. La simulación confirma que en $t = 1\text{ s}$ el error es de $0,0833\text{ V}$, en $t = 5\text{ s}$ asciende a $0,4167\text{ V}$ y en $t = 10\text{ s}$ alcanza $0,8333\text{ V}$, comprobando numéricamente que el error en régimen permanente diverge a infinito ($e_{ss} \to \infty$).
+\end{itemize}
+
+\section{Respuesta para distintos valores de $k$ (serie E24)}
+Para realizar la ganancia $k = 1 + \frac{R_7}{R_9}$ con resistencias comerciales de la serie E24 en el rango de $1\text{ k}\Omega$ a $100\text{ k}\Omega$, fijamos $R_9 = 1\text{ k}\Omega$ y calculamos $R_7 = (k - 1)R_9$, admitiéndose también resistencias de valor cero e infinito según la consigna:
+\begin{itemize}
+    \item \textbf{$k = 1$:} Se reemplaza $R_7$ por un cortocircuito ($R_7 = 0\,\Omega$) y se desconecta $R_9$ ($R_9 \to \infty$), quedando $U_{2A}$ como seguidor de tensión con $k_{\text{ef}} = 1$.
     \item \textbf{$k = 3,2$:} $R_7 = 2,2\text{ k}\Omega$ y $R_9 = 1\text{ k}\Omega \implies k_{\text{ef}} = 1 + \frac{2,2}{1} = 3,2$.
     \item \textbf{$k = 5,7$:} $R_7 = 4,7\text{ k}\Omega$ y $R_9 = 1\text{ k}\Omega \implies k_{\text{ef}} = 1 + \frac{4,7}{1} = 5,7$.
     \item \textbf{$k = 34$:} $R_7 = 33\text{ k}\Omega$ y $R_9 = 1\text{ k}\Omega \implies k_{\text{ef}} = 1 + \frac{33}{1} = 34$.
 \end{itemize}
-Como $2,2$, $4,7$ y $33$ son valores exactos de la serie E24, en los cuatro casos el $k$ efectivo coincide exactamente con el valor pedido (error relativo del $0\%$). En la Tabla \ref{tab:punto4} se resumen los parámetros calculados en MATLAB (script \texttt{TP\_Lab1.m}, mediante las funciones \texttt{tf}, \texttt{feedback}, \texttt{damp}, \texttt{stepinfo} y \texttt{dcgain} del \textit{Control System Toolbox}, en concordancia con las expresiones analíticas de los puntos anteriores).
+Como $2,2$, $4,7$ y $33$ son valores exactos de la serie E24, en los cuatro casos el $k$ efectivo coincide exactamente con el valor pedido (error relativo del $0\%$). En la Tabla \ref{tab:punto4} se resumen los parámetros del sistema calculados en MATLAB para cada valor de $k$, en plena concordancia con las expresiones analíticas de los puntos anteriores.
 
 \begin{table}[H]
     \centering
@@ -197,10 +212,10 @@ Como $2,2$, $4,7$ y $33$ son valores exactos de la serie E24, en los cuatro caso
 \section{Circuito con op-amps ideales}
 
 \subsection{Implementación en Simscape}
-Se armó el circuito completo de la Fig. \ref{fig:circuito} en Simscape (\texttt{TP\_Lab1\_Ideal.slx}) utilizando componentes físicos de la librería \textit{Foundation Library $>$ Electrical}: resistores, capacitores con tensión inicial fijada en $0\text{ V}$ y el bloque \texttt{Op-Amp} ideal para $U_{1A}$, $U_{3A}$ y $U_{2A}$. La excitación en escalón de $1\text{ V}$ se inyecta mediante un bloque \texttt{Step} de Simulink acoplado a una \texttt{Controlled Voltage Source} a través de un \texttt{Simulink-PS Converter}, y la tensión de salida se mide con un \texttt{Voltage Sensor}. La red se resuelve con el integrador para sistemas rígidos \texttt{ode23t} durante $50\text{ ms}$.
+Se armó el circuito completo de la Fig. \ref{fig:circuito} en Simscape utilizando resistores, capacitores inicialmente descargados ($0\text{ V}$) y amplificadores operacionales ideales para $U_{1A}$, $U_{3A}$ y $U_{2A}$, aplicando un escalón de entrada de $1\text{ V}$ durante $50\text{ ms}$.
 
 \subsection{Comparación de la salida con $\text{Sys}_f(s)$ ($k = 11$)}
-En la Fig. \ref{fig:punto5b} se superpone la tensión de salida obtenida en Simscape con la respuesta teórica de $\text{Sys}_f(s)$ calculada en MATLAB (\texttt{step(Sysf\_nom)}). Como el integrador \texttt{ode23t} emplea paso variable y \texttt{step} requiere una grilla temporal uniforme, se interpoló la señal simulada sobre una grilla equiespaciada de $5000$ puntos para evaluar la diferencia punto a punto.
+En la Fig. \ref{fig:punto5b} se superpone la tensión de salida obtenida en Simscape con la respuesta teórica al escalón de $\text{Sys}_f(s)$.
 
 \begin{figure}[H]
     \centering
@@ -213,19 +228,19 @@ El error máximo absoluto entre ambas curvas en todo el intervalo de simulación
 \begin{equation}
     e_{\max} = \max_{t \in [0,\,50\text{ ms}]} \left|y_{\text{teor}}(t) - y_{\text{sim}}(t)\right| = 1,69 \times 10^{-6}\text{ V}
 \end{equation}
-Ambas respuestas coinciden de forma prácticamente exacta porque tanto la deducción analítica de $\text{Sys}_f(s)$ como el bloque \texttt{Op-Amp} ideal de Simscape asumen amplificadores sin corriente de entrada ($I_+ = I_- = 0$), ganancia de lazo abierto infinita ($V_+ = V_-$), ancho de banda infinito y ausencia de saturación, de modo que el seguidor $U_{3A}$ aísla perfectamente las dos etapas $RC$. La diferencia de $1,69\,\mu\text{V}$ se debe únicamente al error numérico de integración del solver \texttt{ode23t}.
+Ambas respuestas coinciden porque tanto la deducción analítica de $\text{Sys}_f(s)$ como el modelo de op-amp ideal de Simscape asumen corriente de entrada nula ($I_+ = I_- = 0$), ganancia de lazo abierto infinita ($V_+ = V_-$) y ausencia de saturación, de modo que el seguidor $U_{3A}$ aísla las dos etapas $RC$. La mínima diferencia de $1,69\,\mu\text{V}$ se debe únicamente a la tolerancia numérica del simulador.
 
 \subsection{Señal de error $e(t)$ a la salida de $U_{1A}$ ($k = 11$)}
 La tensión a la salida del restador $U_{1A}$ corresponde a la señal de error $E(s) = \text{Entrada}(s) - \text{Salida}(s)$. Sabiendo que $\text{Salida}(s) = G(s)E(s)$ con $G(s) = \text{Sys}_1(s)\text{Sys}_2(s)$, la función de transferencia entre la referencia y el error es:
 \begin{equation}
     \text{Sys}_e(s) = \frac{E(s)}{\text{Entrada}(s)} = \frac{1}{1 + G(s)} = \frac{(\tau_1 s + 1)(\tau_2 s + 1)}{(\tau_1 s + 1)(\tau_2 s + 1) + k}
 \end{equation}
-Reemplazando $\tau_1 = 0,01\text{ s}$, $\tau_2 = 0,0047\text{ s}$ y $k = 11$ (calculada en MATLAB mediante \texttt{feedback(1, G\_nom)}):
+Reemplazando $\tau_1 = 0,01\text{ s}$, $\tau_2 = 0,0047\text{ s}$ y $k = 11$:
 \begin{equation}
     \text{Sys}_e(s) = \frac{4,7 \times 10^{-5}\,s^2 + 0,0147\,s + 1}{4,7 \times 10^{-5}\,s^2 + 0,0147\,s + 12} = \frac{s^2 + 312,77\,s + 21276,60}{s^2 + 312,77\,s + 255319,15}
 \end{equation}
 
-En la Fig. \ref{fig:punto5c} se superpone la respuesta teórica al escalón de $\text{Sys}_e(s)$ con la tensión medida en el terminal de salida de $U_{1A}$ en Simscape (\texttt{simlog.U1A.out.v}).
+En la Fig. \ref{fig:punto5c} se superpone la respuesta teórica al escalón de $\text{Sys}_e(s)$ con la tensión medida a la salida de $U_{1A}$ en Simscape.
 
 \begin{figure}[H]
     \centering
@@ -238,10 +253,10 @@ En $t = 0^+$, al estar descargados los capacitores ($y(0^+) = 0\text{ V}$), el e
 \begin{equation}
     e_{\text{sim}}(\infty) = 0,0833\text{ V} = \frac{1}{12}\text{ V}
 \end{equation}
-coincidiendo con el error en estado estacionario $e_{ss} = \frac{1}{1+k}$ calculado en el Punto 3 (con una discrepancia máxima punto a punto de $1,69\,\mu\text{V}$ entre toda la curva teórica y la simulada).
+coincidiendo con el error en estado estacionario $e_{ss} = \frac{1}{1+k}$ calculado en el Punto 3.
 
 \subsection{Comparación para los cuatro valores de $k$ del Punto 4}
-Se repitió la simulación en Simscape para $k \in \{1;\, 3,2;\, 5,7;\, 34\}$ fijando $R_9 = 1\text{ k}\Omega$ y variando $R_7 \in \{0\,\Omega;\, 2,2\text{ k}\Omega;\, 4,7\text{ k}\Omega;\, 33\text{ k}\Omega\}$ mediante \texttt{Simulink.SimulationInput}. En la Fig. \ref{fig:punto5d} se superponen las respuestas teóricas y simuladas para los cuatro casos, y en la Tabla \ref{tab:punto5d} se comparan los parámetros teóricos frente a los medidos sobre las curvas de Simscape con \texttt{stepinfo}.
+Se repitió la simulación en Simscape para $k \in \{1;\, 3,2;\, 5,7;\, 34\}$ fijando $R_9 = 1\text{ k}\Omega$ y empleando los valores comerciales $R_7 \in \{0\,\Omega;\, 2,2\text{ k}\Omega;\, 4,7\text{ k}\Omega;\, 33\text{ k}\Omega\}$. En la Fig. \ref{fig:punto5d} se superponen las respuestas teóricas y simuladas para los cuatro casos, y en la Tabla \ref{tab:punto5d} se comparan los parámetros teóricos frente a los medidos sobre las curvas de Simscape.
 
 \begin{figure}[H]
     \centering
@@ -269,6 +284,174 @@ Se repitió la simulación en Simscape para $k \in \{1;\, 3,2;\, 5,7;\, 34\}$ fi
     \label{tab:punto5d}
 \end{table}
 
-En los cuatro casos el error máximo entre la curva teórica y la simulada se mantiene por debajo de $1,2 \times 10^{-5}\text{ V}$. Las leves diferencias en la segunda cifra decimal de $PO$ y en $T_s$ se deben a que la columna teórica reporta la aproximación de envolvente $T_s \approx 4/(\xi\omega_n) = 25,6\text{ ms}$, mientras que \texttt{stepinfo} mide el instante exacto en que la oscilación ingresa por última vez a la banda del $\pm 2\%$ sobre los puntos discretos de la simulación.
+Las leves diferencias en $T_s$ se deben a que la columna teórica reporta la aproximación de envolvente $T_s \approx 4/(\xi\omega_n) = 25,6\text{ ms}$, mientras que la simulación mide el instante exacto en que la curva ingresa por última vez a la banda del $\pm 2\%$.
+
+\section{Circuito con amplificadores operacionales no ideales (TL081)}
+
+\subsection{Comparación en régimen lineal ($k = 11$ y $k = 34$, escalón de $1\text{ V}$)}
+Se reemplazaron los tres amplificadores operacionales ideales por el modelo con limitaciones del TL081 alimentado con $\pm 10\text{ V}$ según los datos del Anexo (ganancia de lazo abierto $A = 2 \times 10^5$, resistencia de entrada $R_{\text{in}} = 10^{12}\,\Omega$, resistencia de salida $R_{\text{out}} = 0\,\Omega$ y límites de excursión de tensión de salida $V_{\min} = -8,5\text{ V}$ y $V_{\max} = +8,5\text{ V}$).
+
+En la Fig. \ref{fig:punto6a} y en la Tabla \ref{tab:punto6a} se comparan las respuestas frente a un escalón de $1\text{ V}$ para $k = 11$ ($R_7 = 10\text{ k}\Omega$, $R_9 = 1\text{ k}\Omega$) y $k = 34$ ($R_7 = 33\text{ k}\Omega$, $R_9 = 1\text{ k}\Omega$) entre el modelo ideal y el modelo con TL081.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.78\textwidth]{figuras/punto6a_comparacion.png}
+    \caption{Comparación entre op-amps ideales y TL081 en régimen lineal ($1\text{ V}$) para $k = 11$ y $k = 34$.}
+    \label{fig:punto6a}
+\end{figure}
+
+\begin{table}[H]
+    \centering
+    \small
+    \setlength{\tabcolsep}{4pt}
+    \begin{tabular}{c c c c c c c c c}
+        \toprule
+        \textbf{$k$} & \textbf{Modelo} & \textbf{$PO$ [\%]} & \textbf{$T_p$ [ms]} & \textbf{$T_s$ [ms]} & \textbf{$t_r$ [ms]} & \textbf{$y_{\text{pico}}$ [V]} & \textbf{$y(\infty)$ [V]} & \textbf{Error máx. vs. Ideal} \\
+        \midrule
+        $11$ & Ideal & $35,97$ & $6,5$ & $22,2$ & $2,6$ & $1,2464$ & $0,9167$ & --- \\
+        $11$ & TL081 & $35,99$ & $6,5$ & $22,2$ & $2,6$ & $1,2466$ & $0,9167$ & $0,21\text{ mV}$ \\
+        \midrule
+        $34$ & Ideal & $56,05$ & $3,7$ & $23,3$ & $1,4$ & $1,5159$ & $0,9714$ & --- \\
+        $34$ & TL081 & $56,20$ & $3,7$ & $23,3$ & $1,4$ & $1,5174$ & $0,9714$ & $1,69\text{ mV}$ \\
+        \bottomrule
+    \end{tabular}
+    \caption{Parámetros de la respuesta temporal al escalón unitario: op-amp ideal vs. TL081.}
+    \label{tab:punto6a}
+\end{table}
+
+Para un escalón de $1\text{ V}$, la tensión de salida alcanza como máximo $1,25\text{ V}$ ($k = 11$) y $1,52\text{ V}$ ($k = 34$). Como en ambos casos las tensiones se mantienen muy por debajo de los límites de saturación de $\pm 8,5\text{ V}$, los operacionales trabajan siempre en su zona lineal. Dado que el TL081 tiene una ganancia de lazo abierto muy elevada ($A = 2 \times 10^5$) y una impedancia de entrada muy alta ($10^{12}\,\Omega$), su comportamiento en zona lineal es prácticamente idéntico al del operacional ideal (con diferencias menores a $2\text{ mV}$).
+
+\subsection{Amplitud de escalón para el inicio del recorte ($k = 34$)}
+Para $k = 34$, con una ganancia estática $y(\infty) = \frac{34}{35} \approx 0,9714\text{ V}$ y un sobrepaso $PO = 56,05\%$, el valor pico por cada voltio de escalón de entrada es:
+\begin{equation}
+    y_{\text{pico, 1V}} = \frac{34}{35}\left(1 + \frac{PO}{100}\right) = 1,5159\text{ V/V} \approx 1,52\text{ V/V}
+\end{equation}
+Como el TL081 alimentado con $\pm 10\text{ V}$ satura su salida en $V_{\max} = 8,5\text{ V}$, la amplitud del escalón de entrada a partir de la cual la salida de $U_{2A}$ alcanza el recorte es:
+\begin{equation}
+    A_{\text{recorte}} = \frac{V_{\max}}{y_{\text{pico, 1V}}} = \frac{8,5\text{ V}}{1,52\text{ V/V}} \approx 5,59\text{ V}
+\end{equation}
+
+\subsection{Simulación con escalones de $5\text{ V}$ y $7\text{ V}$ ($k = 34$)}
+Se simuló el circuito con TL081 frente a escalones de $5\text{ V}$ y $7\text{ V}$, superponiendo los resultados con la respuesta de $\text{Sys}_f(s)$ en la Fig. \ref{fig:punto6c} y resumiendo las medidas en la Tabla \ref{tab:punto6c}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.78\textwidth]{figuras/punto6c_saturacion.png}
+    \caption{Respuesta con TL081 ($k = 34$) ante escalones de $5\text{ V}$ (lineal) y $7\text{ V}$ (saturación en $8,5\text{ V}$).}
+    \label{fig:punto6c}
+\end{figure}
+
+\begin{table}[H]
+    \centering
+    \small
+    \begin{tabular}{l c c c c c c}
+        \toprule
+        \textbf{Entrada} & \textbf{Modelo} & \textbf{$y_{\text{pico}}$ [V]} & \textbf{$PO$ [\%]} & \textbf{$T_p$ [ms]} & \textbf{$T_s$ [ms]} & \textbf{$y(\infty)$ [V]} \\
+        \midrule
+        Escalón $5\text{ V}$ & $\text{Sys}_f$ lineal & $7,58$ & $56,05$ & $3,7$ & $23,3$ & $4,8571$ \\
+        Escalón $5\text{ V}$ & TL081 (Sim.)          & $7,59$ & $56,20$ & $3,7$ & $23,3$ & $4,8571$ \\
+        \midrule
+        Escalón $7\text{ V}$ & $\text{Sys}_f$ lineal & $10,61$ & $56,05$ & $3,7$ & $23,3$ & $6,8000$ \\
+        Escalón $7\text{ V}$ & TL081 (Sim.)          & $8,50$ & $25,00$ & $2,5^*$ & $25,0$ & $6,8000$ \\
+        \bottomrule
+    \end{tabular}
+    \caption{Comparación entre el modelo lineal y el circuito con TL081 ante escalones de $5\text{ V}$ y $7\text{ V}$. ($^*$Instante en el que alcanza el límite de $8,50\text{ V}$).}
+    \label{tab:punto6c}
+\end{table}
+
+\begin{itemize}
+    \item \textbf{Escalón de $5\text{ V}$ ($A < 5,59\text{ V}$):} La salida alcanza un pico de $7,59\text{ V} < 8,5\text{ V}$. Como no supera el límite del operacional, el circuito se mantiene en zona lineal y la respuesta es simplemente $5$ veces la del escalón unitario, coincidiendo con $\text{Sys}_f(s)$.
+    \item \textbf{Escalón de $7\text{ V}$ ($A > 5,59\text{ V}$) y por qué $\text{Sys}_f(s)$ deja de describir al circuito:} Una función de transferencia solo es válida para sistemas lineales (donde vale la proporcionalidad). Para $7\text{ V}$, el modelo lineal predice un pico de $10,61\text{ V}$, pero el operacional $U_{2A}$ satura y recorta la salida en $+8,50\text{ V}$. Este tope físico es un efecto no lineal que la función de transferencia $\text{Sys}_f(s)$ no contempla, reduciendo el sobrepaso real al $25\%$ y modificando el transitorio hasta que la tensión baja de $8,5\text{ V}$ y el circuito converge al valor estacionario $y(\infty) = 6,80\text{ V}$ (que sí está en zona lineal).
+\end{itemize}
+
+\section{Sensibilidad a las tolerancias de componentes}
+
+\subsection{Identificación y justificación analítica de los casos extremos ($k = 11$)}
+Considerando resistores al $\pm 5\%$ y capacitores al $\pm 10\%$, el sobrepaso $PO = 100\,e^{-\pi\xi/\sqrt{1-\xi^2}}$ aumenta a medida que disminuye el factor de amortiguamiento $\xi$, por lo que el mayor sobrepaso ocurre con $\xi$ mínimo y el menor con $\xi$ máximo. A partir de las expresiones obtenidas en el Punto 1 ($\tau_1 = R_1 C_1$, $\tau_2 = R_2 C_2$ y $k = 1 + R_7/R_9$):
+\begin{equation}
+    \omega_n = \sqrt{\frac{1+k}{\tau_1 \tau_2}}, \qquad \xi = \frac{\tau_1 + \tau_2}{2\sqrt{\tau_1 \tau_2 (1+k)}}
+\end{equation}
+
+Analizando cómo influyen los componentes sobre $\xi$:
+\begin{enumerate}
+    \item \textbf{Ganancia $k = 1 + R_7/R_9$:} Como $(1+k)$ está dividiendo dentro de la raíz, $\xi$ disminuye cuando $k$ aumenta. Por lo tanto, se tiene menor $\xi$ (mayor $PO$) cuando $k$ es máximo ($R_7$ en $+5\%$ y $R_9$ en $-5\%$, dando $k_{ef} = 12,053$), y mayor $\xi$ (menor $PO$) cuando $k$ es mínimo ($R_7$ en $-5\%$ y $R_9$ en $+5\%$, dando $k_{ef} = 10,048$).
+    \item \textbf{Constantes de tiempo $\tau_1$ y $\tau_2$:} El cociente $\frac{\tau_1 + \tau_2}{\sqrt{\tau_1 \tau_2}}$ es mínimo cuando $\tau_1$ y $\tau_2$ se acercan entre sí, y crece cuando se alejan. Como nominalmente $\tau_1 = 10\text{ ms}$ es mayor que $\tau_2 = 4,7\text{ ms}$:
+    \begin{itemize}
+        \item Para menor $\xi$ (mayor $PO$), hay que acercar ambas constantes de tiempo: $\tau_1$ al mínimo ($R_1 -5\%$, $C_1 -10\%$) y $\tau_2$ al máximo ($R_2 +5\%$, $C_2 +10\%$).
+        \item Para mayor $\xi$ (menor $PO$), hay que alejarlas: $\tau_1$ al máximo ($R_1 +5\%$, $C_1 +10\%$) y $\tau_2$ al mínimo ($R_2 -5\%$, $C_2 -10\%$).
+    \end{itemize}
+\end{enumerate}
+
+En la Tabla \ref{tab:punto7a} se resumen las combinaciones de componentes y los parámetros resultantes.
+
+\begin{table}[H]
+    \centering
+    \footnotesize
+    \setlength{\tabcolsep}{2.8pt}
+    \begin{tabular}{l c c c c c c c c c c}
+        \toprule
+        \textbf{Condición} & \textbf{$R_1$ [k$\Omega$]} & \textbf{$C_1$ [nF]} & \textbf{$R_2$ [k$\Omega$]} & \textbf{$C_2$ [nF]} & \textbf{$R_7$ [k$\Omega$]} & \textbf{$R_9$ [k$\Omega$]} & \textbf{$\tau_1$ [ms]} & \textbf{$\tau_2$ [ms]} & \textbf{$k_{ef}$} & \textbf{$\xi$} \\
+        \midrule
+        Mayor sobrepaso ($PO_{\max}$) & $95,0$ & $90$ & $49,35$ & $110$ & $10,5$ & $0,95$ & $8,550$ & $5,429$ & $12,053$ & $0,2840$ \\
+        Caso nominal & $100,0$ & $100$ & $47,00$ & $100$ & $10,0$ & $1,00$ & $10,000$ & $4,700$ & $11,000$ & $0,3095$ \\
+        Menor sobrepaso ($PO_{\min}$) & $105,0$ & $110$ & $44,65$ & $90$ & $9,5$ & $1,05$ & $11,550$ & $4,019$ & $10,048$ & $0,3438$ \\
+        \bottomrule
+    \end{tabular}
+    \caption{Combinaciones extremas de componentes pasivos y parámetros resultantes ($k = 11$).}
+    \label{tab:punto7a}
+\end{table}
+
+\subsection{Simulación de los casos extremos en Simscape}
+En la Fig. \ref{fig:punto7b} se superponen las respuestas al escalón unitario obtenidas en Simscape para los dos casos extremos y el caso nominal, y en la Tabla \ref{tab:punto7b} se informan los parámetros medidos.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.78\textwidth]{figuras/punto7b_tolerancias.png}
+    \caption{Simulación en Simscape de los casos extremos de tolerancia pasiva junto con el caso nominal ($k = 11$).}
+    \label{fig:punto7b}
+\end{figure}
+
+\begin{table}[H]
+    \centering
+    \small
+    \setlength{\tabcolsep}{5pt}
+    \begin{tabular}{l c c c c c c c}
+        \toprule
+        \textbf{Condición} & \textbf{$\omega_n$ [rad/s]} & \textbf{$\xi$} & \textbf{$PO$ [\%]} & \textbf{$T_p$ [ms]} & \textbf{$T_s$ [ms]} & \textbf{$y(\infty)$ [V]} & \textbf{$e_{ss}$ [V]} \\
+        \midrule
+        Menor sobrepaso ($PO_{\min}$) & $487,9$ & $0,3438$ & $31,66$ & $6,9$ & $22,6$ & $0,9095$ & $0,0905$ \\
+        Caso nominal ($k = 11$)       & $505,3$ & $0,3095$ & $35,97$ & $6,5$ & $22,2$ & $0,9167$ & $0,0833$ \\
+        Mayor sobrepaso ($PO_{\max}$) & $530,3$ & $0,2840$ & $39,44$ & $6,2$ & $25,9$ & $0,9234$ & $0,0766$ \\
+        \bottomrule
+    \end{tabular}
+    \caption{Resultados de simulación en Simscape para los casos extremos de tolerancia pasiva ($k = 11$).}
+    \label{tab:punto7b}
+\end{table}
+
+\textbf{Rangos de variación de $PO$ y $T_s$:}
+\begin{itemize}
+    \item \textbf{Sobrepaso porcentual ($PO$):} Varía entre $31,66\%$ y $39,44\%$ (un rango total de $\Delta PO = 7,78$ puntos porcentuales).
+    \item \textbf{Tiempo de establecimiento ($T_s$):} Según la envolvente teórica $4/(\xi\omega_n)$, el tiempo disminuye de $26,6\text{ ms}$ ($PO_{\max}$) a $25,6\text{ ms}$ (nominal) y $23,9\text{ ms}$ ($PO_{\min}$). Medido sobre la simulación con el criterio exacto del $\pm 2\%$, varía entre $22,2\text{ ms}$ y $25,9\text{ ms}$ ($\Delta T_s = 3,7\text{ ms}$), ya que en el caso nominal y en el de $PO_{\min}$ el valle siguiente queda apenas dentro de la banda del $2\%$ y el cruce se define en el ciclo previo (donde $PO_{\min}$ cruza $0,4\text{ ms}$ después por tener menor $\omega_n$).
+\end{itemize}
+
+\subsection{Comparación entre el efecto de las tolerancias y el op-amp real}
+En la Tabla \ref{tab:punto7c} se compara la variación de $PO$ y $T_s$ producida por las tolerancias de los componentes (Punto 7.b) con la producida al reemplazar los op-amps ideales por el TL081 en régimen lineal (Punto 6.a, $k = 11$).
+
+\begin{table}[H]
+    \centering
+    \small
+    \begin{tabular}{l c c c}
+        \toprule
+        \textbf{Efecto considerado ($k = 11$)} & \textbf{Rango de $PO$ [\%]} & \textbf{$|\Delta PO|$ [\%]} & \textbf{$|\Delta T_s|$ [ms]} \\
+        \midrule
+        Tolerancias de componentes ($\pm 5\%$ en $R$, $\pm 10\%$ en $C$) & $31,66$ a $39,44$ & $7,78$ & $3,7$ \\
+        Reemplazo por op-amp TL081 en zona lineal (Punto 6.a)            & $35,97$ a $35,99$ & $0,02$ & $< 0,1$ \\
+        \bottomrule
+    \end{tabular}
+    \caption{Comparación entre el efecto de las tolerancias y el reemplazo por el TL081 en régimen lineal.}
+    \label{tab:punto7c}
+\end{table}
+
+\textbf{Efecto dominante:} Domina claramente la variación por las tolerancias de los componentes pasivos ($\Delta PO = 7,78\%$ y $\Delta T_s = 3,7\text{ ms}$), mientras que el cambio por usar el TL081 en régimen lineal es prácticamente despreciable ($\Delta PO = 0,02\%$ y $\Delta T_s < 0,1\text{ ms}$).
 
 \end{document}
