@@ -34,7 +34,7 @@
 Las especificaciones requeridas para el sistema en lazo cerrado son:
 \begin{itemize}
     \item $PO \le 5\%$
-    \item $T_s \le 0{,}10\text{ s}$
+    \item $T_s \le 0{,}10\text{ s}$ (criterio del $2\%$)
     \item $e_{ss} = 0$ para escalón unitario
 \end{itemize}
 
@@ -49,12 +49,42 @@ El sistema es de \textbf{Tipo 0}, ya que no posee polos en el origen en lazo abi
 \begin{equation}
     K_p^{\text{pos}} = \lim_{s \to 0} k_p G(s) = k_p
 \end{equation}
-
-Por lo tanto, el error en estado estacionario resulta:
+Por lo tanto, el error en régimen permanente resulta:
 \begin{equation}
-    e_{ss} = \lim_{s \to 0} s E(s) = \frac{1}{1 + K_p^{\text{pos}}} = \frac{1}{1 + k_p}
+    e_{ss} = \frac{1}{1 + K_p^{\text{pos}}} = \frac{1}{1 + k_p}
 \end{equation}
+Dado que para cualquier ganancia finita $k_p < \infty$ el error es estrictamente positivo, la especificación de \textbf{$e_{ss} = 0$ no puede cumplirse} con un control proporcional puro. Lograr un error nulo requeriría una ganancia infinita, lo cual físicamente saturaría los componentes y no es realizable.
 
-Dado que para cualquier ganancia finita $k_p < \infty$ se tiene que $e_{ss} > 0$, la especificación de \textbf{$e_{ss} = 0$ no puede cumplirse} con un controlador proporcional. Lograr un error nulo requeriría una ganancia infinita, lo cual no es físicamente realizable.
+A partir del trazado del Lugar de las Raíces de $G(s)$ en MATLAB (Fig. \ref{fig:punto1_lgr}), se analizan las especificaciones restantes:
+
+\begin{itemize}
+    \item \textbf{Tiempo de establecimiento ($T_s \le 0{,}10\text{ s}$):} Como se observó en el Trabajo de Laboratorio 1, las ramas del LGR se desplazan verticalmente a lo largo de $\text{Re}(s) = \sigma = -156{,}4\text{ rad/s}$ una vez superado el punto de ruptura ($k_p \ge 0{,}15$). Dado que la parte real es independiente del valor de $k_p$ en dicha región, el tiempo de establecimiento al $2\%$ resulta:
+    \begin{equation}
+        T_s \approx \frac{4}{\sigma} = \frac{4}{156{,}4} \approx 0{,}0256\text{ s}
+    \end{equation}
+    Este valor es constante ($\approx 25{,}6\text{ ms}$) y cumple holgadamente con la cota de $0{,}10\text{ s}$ para cualquier valor de $k_p$ que genere polos complejos.
+
+    \item \textbf{Sobrepaso ($PO \le 5\%$):} Para limitar el sobrepaso al $5\%$, el factor de amortiguamiento debe cumplir $\xi \ge 0{,}69$. En el gráfico, esto define una región admisible comprendida entre las dos rectas radiales de $\xi = 0{,}69$, lo que otorga libertad para seleccionar cualquier ganancia en el rango $0{,}15 \le k_p \le 1{,}41$.
+
+    \item \textbf{Criterio de selección de $k_p$:} Dentro del intervalo admisible, se elige el valor de ganancia más alto posible ($k_p \approx 1{,}4$) por las siguientes razones:
+    \begin{enumerate}
+        \item Minimiza el error en régimen permanente $e_{ss} = 1/(1 + k_p)$.
+        \item Se ubica dentro del rango de amortiguamiento considerado óptimo desde el punto de vista del compromiso entre rapidez y oscilación ($0{,}6 \le \xi \le 0{,}8$).
+        \item Maximiza la frecuencia natural $\omega_n$, reduciendo los tiempos de subida y de pico del sistema.
+    \end{enumerate}
+\end{itemize}
+
+Mediante la herramienta interactiva de MATLAB se selecciona el punto sobre la frontera $\xi = 0{,}69$, obteniéndose:
+\begin{equation}
+    k_p \approx 1{,}40
+\end{equation}
+cuyos polos en lazo cerrado se sitúan en $s_{1,2} \approx -156 \pm j 163\text{ rad/s}$, con un amortiguamiento $\xi = 0{,}692$ y un sobrepaso de $PO = 4{,}9\%$. Cabe destacar que, al seleccionar resistencias comerciales en etapas posteriores, convendrá redondear la ganancia resultante ligeramente hacia abajo para evitar que las tolerancias superen la cota de sobrepaso.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\textwidth]{figuras/punto1_lgr.png}
+    \caption{Lugar de las Raíces de $G(s)$ en MATLAB y selección interactiva de $k_p = 1{,}4$ sobre la cota $\xi = 0{,}69$.}
+    \label{fig:punto1_lgr}
+\end{figure}
 
 \end{document}
