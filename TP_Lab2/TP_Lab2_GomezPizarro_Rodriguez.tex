@@ -40,29 +40,21 @@ Las especificaciones requeridas para el sistema en lazo cerrado son:
 
 \subsection*{Punto 1. Ajuste de $k_p$ mediante el Lugar de las Raíces}
 
-De antemano se observa que la planta es un sistema de \textbf{Tipo 0} (no posee polos en el origen en lazo abierto). Para una entrada escalón unitario, el error en estado estacionario resulta:
+La planta a controlar está formada por dos etapas pasa-bajos desacopladas. Su función de transferencia a lazo abierto (sin considerar la ganancia $k_p$) es:
 \begin{equation}
-    e_{ss} = \frac{1}{1 + k_p}
-\end{equation}
-Para cualquier valor finito de $k_p$, $e_{ss} > 0$. Por lo tanto, la especificación de \textbf{$e_{ss} = 0$ no puede cumplirse} con este controlador.
-
-La función de transferencia de la planta sin considerar la ganancia $k_p$ es:
-\begin{equation}
-    G(s) = \frac{1}{(0{,}01s + 1)(0{,}0047s + 1)} = \frac{21276{,}6}{(s + 100)(s + 212{,}77)}
+    G(s) = \frac{1}{(R_1 C_1 s + 1)(R_2 C_2 s + 1)} = \frac{1}{(0{,}01s + 1)(0{,}0047s + 1)}
 \end{equation}
 
-A partir del trazado del Lugar de las Raíces de $G(s)$ y superponiendo la línea de amortiguamiento $\xi = 0{,}69$ (correspondiente al límite de $PO \le 5\%$), se determina mediante la herramienta interactiva el valor de ganancia en la intersección con las ramas:
+El sistema es de \textbf{Tipo 0}, ya que no posee polos en el origen en lazo abierto. Ante una entrada escalón unitario $R(s) = 1/s$, la constante estática de error de posición con control proporcional $k_p$ es:
 \begin{equation}
-    k_p = 1{,}41
+    K_p^{\text{pos}} = \lim_{s \to 0} k_p G(s) = k_p
 \end{equation}
 
-Para este valor, los polos en lazo cerrado se ubican en $s_{1,2} \approx -156{,}4 \pm j 164{,}0\text{ rad/s}$. Dado que la parte real es $\sigma = -156{,}4\text{ rad/s}$, el tiempo de establecimiento es de aproximadamente $25{,}6\text{ ms}$, cumpliendo holgadamente con $T_s \le 0{,}10\text{ s}$.
+Por lo tanto, el error en estado estacionario resulta:
+\begin{equation}
+    e_{ss} = \lim_{s \to 0} s E(s) = \frac{1}{1 + K_p^{\text{pos}}} = \frac{1}{1 + k_p}
+\end{equation}
 
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.7\textwidth]{figuras/punto1_lgr.png}
-    \caption{Lugar de las Raíces de $G(s)$, línea de diseño $\xi = 0{,}69$ y polos en lazo cerrado para $k_p = 1{,}41$.}
-    \label{fig:punto1_lgr}
-\end{figure}
+Dado que para cualquier ganancia finita $k_p < \infty$ se tiene que $e_{ss} > 0$, la especificación de \textbf{$e_{ss} = 0$ no puede cumplirse} con un controlador proporcional. Lograr un error nulo requeriría una ganancia infinita, lo cual no es físicamente realizable.
 
 \end{document}
