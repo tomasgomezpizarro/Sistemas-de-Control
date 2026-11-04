@@ -13,6 +13,15 @@ if ~exist(fig_dir, 'dir')
     mkdir(fig_dir);
 end
 
+%% Configuración de visualización
+% true: abre las ventanas de las figuras; false: segundo plano y guarda PNGs
+mostrar_graficos = true;
+if mostrar_graficos
+    vis_opt = 'on';
+else
+    vis_opt = 'off';
+end
+
 %% =========================================================================
 %% MODELO DE LA PLANTA G(s)
 %% =========================================================================
@@ -37,7 +46,7 @@ G
 %% =========================================================================
 
 %% Punto 1: Lugar de las Raíces para ajuste de kp
-fig1 = figure('Name', 'Parte 1 - Punto 1: Lugar de las Raíces - Planta G(s)', 'Position', [100, 100, 700, 480], 'Visible', 'off');
+fig1 = figure('Name', 'Parte 1 - Punto 1: Lugar de las Raíces - Planta G(s)', 'Position', [100, 100, 700, 480], 'Visible', vis_opt);
 rlocus(G);
 sgrid(0.69, []);
 title('Lugar de las Raíces de G(s) - Control Proporcional');
@@ -45,7 +54,7 @@ xlabel('Eje Real (1/s)');
 ylabel('Eje Imaginario (rad/s)');
 grid on;
 saveas(fig1, fullfile(fig_dir, 'punto1_lgr.png'));
-close(fig1);
+if ~mostrar_graficos, close(fig1); end
 
 %% Punto 2: Verificación de la respuesta al escalón en lazo cerrado
 kp = 1.41;
@@ -63,14 +72,14 @@ fprintf('Valor en estado estacionario:   %.4f V\n', y_inf);
 fprintf('Error estacionario (ess):       %.4f (%.2f %%)  (Especificación: = 0)\n', ess, ess*100);
 
 % Gráfico de la respuesta al escalón
-fig2 = figure('Name', 'Parte 1 - Punto 2: Respuesta al escalón (kp = 1.41)', 'Position', [100, 100, 700, 440], 'Visible', 'off');
+fig2 = figure('Name', 'Parte 1 - Punto 2: Respuesta al escalón (kp = 1.41)', 'Position', [100, 100, 700, 440], 'Visible', vis_opt);
 step(T);
 grid on;
 title(sprintf('Respuesta al escalón en lazo cerrado (k_p = %.2f)', kp));
 xlabel('Tiempo (s)');
 ylabel('Amplitud (V)');
 saveas(fig2, fullfile(fig_dir, 'punto2_escalon.png'));
-close(fig2);
+if ~mostrar_graficos, close(fig2); end
 
 %% Punto 3: Elección de valores comerciales (serie E24) para R7 y R9
 R7 = 1.6e3;    % 1.6 kOhm (E24)
@@ -120,7 +129,7 @@ if exist([mdl_p '.slx'], 'file') || exist(fullfile(script_dir, [mdl_p '.slx']), 
     fprintf('Valor final Simscape:               %.4f V  (FT: %.4f V)\n', y_inf_sim_p, y_inf_real);
     fprintf('Error estacionario Simscape (ess):  %.4f (%.2f %%)  (FT: %.2f %%)\n', ess_sim_p, ess_sim_p*100, ess_real*100);
 
-    fig4 = figure('Name', 'Parte 1 - Punto 4: Superposición FT vs Simscape TL081', 'Position', [100, 100, 720, 420], 'Visible', 'off');
+    fig4 = figure('Name', 'Parte 1 - Punto 4: Superposición FT vs Simscape TL081', 'Position', [100, 100, 720, 420], 'Visible', vis_opt);
     plot(t_unif_p * 1e3, y_ft_p, 'b-', 'LineWidth', 2.0, 'DisplayName', 'Modelo Lineal FT (T_{real})');
     hold on;
     plot(t_sim_p * 1e3, y_sim_p, 'r--', 'LineWidth', 1.4, 'DisplayName', 'Circuito Simscape (TL081)');
@@ -130,7 +139,7 @@ if exist([mdl_p '.slx'], 'file') || exist(fullfile(script_dir, [mdl_p '.slx']), 
     ylabel('Tensión de salida (V)');
     legend('Location', 'southeast');
     saveas(fig4, fullfile(fig_dir, 'punto4_simscape_vs_ft.png'));
-    close(fig4);
+    if ~mostrar_graficos, close(fig4); end
     close_system(mdl_p, 0);
 else
     fprintf('\n[Aviso] No se encontró el modelo %s.slx en el directorio. Se omite simulación de Simscape.\n', mdl_p);
@@ -159,7 +168,7 @@ fprintf('\n=== PARTE 2 - PUNTO 2.a: REQUISITOS EN EL PLANO s ===\n');
 fprintf('xi mínimo para PO <= 5%%:            %.4f (~0.69)\n', xi_min);
 fprintf('sigma mínimo (xi*wn) para Ts<=0.1s: %.2f rad/s\n', sigma_min);
 
-fig2a = figure('Name', 'Parte 2 - Punto 2.a: Región admisible en el plano s', 'Position', [100, 100, 700, 480], 'Visible', 'off');
+fig2a = figure('Name', 'Parte 2 - Punto 2.a: Región admisible en el plano s', 'Position', [100, 100, 700, 480], 'Visible', vis_opt);
 hold on;
 sig_grid = linspace(-180, -sigma_min, 300);
 w_top = -sig_grid * tan(theta_rad);
@@ -187,7 +196,7 @@ text(-sigma_min - 3, 110, '\xi\omega_n = 40', 'Color', 'r', 'FontWeight', 'bold'
 text(-120, 125, 'Cono \xi \geq 0.69', 'Color', 'b', 'FontWeight', 'bold');
 text(-120, 20, {'Región', 'admisible'}, 'Color', [0 0.5 0], 'FontWeight', 'bold', 'HorizontalAlignment', 'center');
 saveas(fig2a, fullfile(fig_dir, 'pi_punto2a_region_s.png'));
-close(fig2a);
+if ~mostrar_graficos, close(fig2a); end
 
 %% Punto 2.b: Centro de las asíntotas sigma_a en función de z
 z_max_asintota = 312.766 - 80;
@@ -205,7 +214,7 @@ z_pi = 120;
 L_unit = ((s + z_pi) / s) * G;
 
 % Gráfico comparativo z=50 vs z=120
-fig_comp_z = figure('Name', 'Comparación de ubicación del cero z', 'Position', [100, 100, 950, 420], 'Visible', 'off');
+fig_comp_z = figure('Name', 'Comparación de ubicación del cero z', 'Position', [100, 100, 950, 420], 'Visible', vis_opt);
 subplot(1, 2, 1);
 rlocus(L_lento);
 hold on;
@@ -240,10 +249,10 @@ text(-120, 100, 'Par complejo dominante', 'Color', 'r', 'FontSize', 9, 'FontWeig
 
 sgtitle('Influencia de la posición del cero z en el Lugar de las Raíces');
 saveas(fig_comp_z, fullfile(fig_dir, 'pi_punto2_comparacion_z.png'));
-close(fig_comp_z);
+if ~mostrar_graficos, close(fig_comp_z); end
 
 % LGR detallado con z = 120 rad/s
-fig_lgr = figure('Name', 'Parte 2 - Punto 2.c: Lugar de las Raíces - Controlador PI (z = 120 rad/s)', 'Position', [100, 100, 720, 480], 'Visible', 'off');
+fig_lgr = figure('Name', 'Parte 2 - Punto 2.c: Lugar de las Raíces - Controlador PI (z = 120 rad/s)', 'Position', [100, 100, 720, 480], 'Visible', vis_opt);
 rlocus(L_unit);
 hold on;
 sgrid(0.69, []);
@@ -258,7 +267,7 @@ ylabel('Eje Imaginario (rad/s)');
 grid on;
 legend('Location', 'northwest');
 saveas(fig_lgr, fullfile(fig_dir, 'pi_punto2_lgr.png'));
-close(fig_lgr);
+if ~mostrar_graficos, close(fig_lgr); end
 
 % Selección de ganancia sobre la cota xi = 0.69 (análogo al Punto 1)
 kp_ini = 0.84;
@@ -305,7 +314,7 @@ fprintf('Tiempo de estab. ajustado (Ts): %.4f s (%.2f ms)  (CUMPLE <= 0.10 s)\n'
 fprintf('Error estacionario (ess):       %.4f  (CUMPLE = 0)\n', ess_aj);
 
 % Gráfico: Comparación temporal del Efecto del Cero
-fig_cero = figure('Name', 'Parte 2 - Punto 2.d: Efecto del Cero de Lazo Cerrado', 'Position', [100, 100, 720, 440], 'Visible', 'off');
+fig_cero = figure('Name', 'Parte 2 - Punto 2.d: Efecto del Cero de Lazo Cerrado', 'Position', [100, 100, 720, 440], 'Visible', vis_opt);
 t_cero = linspace(0, 0.10, 2000);
 [y_proto, t_p] = step(T_proto, t_cero);
 [y_ini_c, ~]   = step(T_ini, t_cero);
@@ -326,7 +335,7 @@ xlabel('Tiempo (ms)');
 ylabel('Tensión de salida y(t) [V]');
 legend('Location', 'southeast');
 saveas(fig_cero, fullfile(fig_dir, 'pi_punto2_efecto_cero.png'));
-close(fig_cero);
+if ~mostrar_graficos, close(fig_cero); end
 
 %% Punto 3: Implementación analógica con Op-Amps y dimensionamiento E24
 CPI_com   = 0.1e-6;   % 0.1 uF
@@ -354,7 +363,7 @@ fprintf('Tiempo de estab. efectivo (Ts): %.4f s (%.2f ms)  (<= 0.10 s)\n', info_
 fprintf('Error estacionario (ess):       %.4f  (= 0)\n', ess_com);
 
 % Gráfico: Respuesta al escalón E24 vs Continuo
-fig_step = figure('Name', 'Punto 3: Respuesta al escalón E24', 'Position', [100, 100, 720, 440], 'Visible', 'off');
+fig_step = figure('Name', 'Punto 3: Respuesta al escalón E24', 'Position', [100, 100, 720, 440], 'Visible', vis_opt);
 t_sim_step = linspace(0, 0.12, 3000);
 [y_aj, ~]  = step(T_aj, t_sim_step);
 [y_c, t_out] = step(T_com, t_sim_step);
@@ -375,7 +384,7 @@ xlabel('Tiempo (ms)');
 ylabel('Tensión de salida y(t) [V]');
 legend('Location', 'southeast');
 saveas(fig_step, fullfile(fig_dir, 'pi_punto3_escalon_e24.png'));
-close(fig_step);
+if ~mostrar_graficos, close(fig_step); end
 
 %% Punto 4: Simulación circuital en Simscape con TL081 (Fig. 5)
 mdl_pi = 'TP_Lab2_PI_TL081';
@@ -410,7 +419,7 @@ if exist([mdl_pi '.slx'], 'file') || exist(fullfile(script_dir, [mdl_pi '.slx'])
     fprintf('Valor final Simscape:               %.4f V  (FT: %.4f V)\n', y_inf_sim_pi, y_inf_com);
     fprintf('Error estacionario Simscape (ess):  %.4f (%.2f %%)  (FT: %.2f %%)\n', ess_sim_pi, ess_sim_pi*100, ess_com*100);
 
-    fig4a = figure('Name', 'Parte 2 - Punto 4.a: Superposición FT vs Simscape TL081 (PI)', 'Position', [100, 100, 720, 420], 'Visible', 'off');
+    fig4a = figure('Name', 'Parte 2 - Punto 4.a: Superposición FT vs Simscape TL081 (PI)', 'Position', [100, 100, 720, 420], 'Visible', vis_opt);
     plot(t_unif_pi * 1e3, y_ft_pi, 'b-', 'LineWidth', 2.0, 'DisplayName', 'Modelo Lineal FT (T_{com})');
     hold on;
     plot(t_sim_pi * 1e3, y_sim_pi, 'r--', 'LineWidth', 1.4, 'DisplayName', 'Circuito Simscape (TL081)');
@@ -423,10 +432,10 @@ if exist([mdl_pi '.slx'], 'file') || exist(fullfile(script_dir, [mdl_pi '.slx'])
     ylabel('Tensión de salida y(t) [V]');
     legend('Location', 'southeast');
     saveas(fig4a, fullfile(fig_dir, 'pi_punto4a_simscape_vs_ft.png'));
-    close(fig4a);
+    if ~mostrar_graficos, close(fig4a); end
 
     % 4.b: Gráfico de tensiones internas y(t), vo1(t) y vPI(t)
-    fig4b = figure('Name', 'Parte 2 - Punto 4.b: Tensiones Internas Simscape (PI)', 'Position', [100, 100, 750, 520], 'Visible', 'off');
+    fig4b = figure('Name', 'Parte 2 - Punto 4.b: Tensiones Internas Simscape (PI)', 'Position', [100, 100, 750, 520], 'Visible', vis_opt);
     subplot(2, 1, 1);
     plot(t_sim_pi * 1e3, y_sim_pi, 'b-', 'LineWidth', 1.6);
     grid on;
@@ -446,7 +455,16 @@ if exist([mdl_pi '.slx'], 'file') || exist(fullfile(script_dir, [mdl_pi '.slx'])
     legend('Location', 'southeast');
 
     saveas(fig4b, fullfile(fig_dir, 'pi_punto4b_tensiones_internas.png'));
-    close(fig4b);
+    if ~mostrar_graficos, close(fig4b); end
+
+    % Mediciones experimentales sobre la simulación (Punto 4.b)
+    [vpi_max, idx_vpi_max] = max(vpi_sim);
+    [vo1_min, idx_vo1_min] = min(vo1_sim);
+    fprintf('\n=== PARTE 2 - PUNTO 4.b: TENSIONES MEDIDAS EN EL CONTROLADOR PI ===\n');
+    fprintf('Salto inicial medido vo1(0+): %.4f V\n', vo1_sim(2));
+    fprintf('Tensión mínima medida vo1:    %.4f V (en t = %.2f ms)\n', vo1_min, t_sim_pi(idx_vo1_min)*1e3);
+    fprintf('Pico máximo medido vPI:       %.4f V (en t = %.2f ms)\n', vpi_max, t_sim_pi(idx_vpi_max)*1e3);
+    fprintf('Valor final medido vPI(inf):  %.4f V\n', vpi_sim(end));
 
     close_system(mdl_pi, 0);
 else
@@ -457,7 +475,7 @@ end
 %% PUNTO 5: COMPARACIÓN FINAL (CONTROL P vs CONTROL PI EN SIMSCAPE)
 %% =========================================================================
 if exist('y_sim_p', 'var') && exist('y_sim_pi', 'var')
-    fig5 = figure('Name', 'Punto 5: Comparación Simscape Control P vs PI', 'Position', [100, 100, 750, 440], 'Visible', 'off');
+    fig5 = figure('Name', 'Punto 5: Comparación Simscape Control P vs PI', 'Position', [100, 100, 750, 440], 'Visible', vis_opt);
     plot(t_sim_p * 1e3, y_sim_p, 'r--', 'LineWidth', 1.6, ...
         'DisplayName', sprintf('Control P: k_p=1.41 (PO=%.1f%%, T_s=%.1f ms, e_{ss}=%.1f%%)', ...
         info_sim_p.Overshoot, info_sim_p.SettlingTime*1e3, ess_sim_p*100));
@@ -479,7 +497,7 @@ if exist('y_sim_p', 'var') && exist('y_sim_pi', 'var')
     legend('Location', 'southeast', 'FontSize', 9);
 
     saveas(fig5, fullfile(fig_dir, 'punto5_comparacion_p_vs_pi.png'));
-    close(fig5);
+    if ~mostrar_graficos, close(fig5); end
 
     fprintf('\n=========================================================================\n');
     fprintf('=== TABLA COMPARATIVA DE DESEMPEÑO: CONTROL P vs CONTROL PI (SIMSCAPE) ===\n');

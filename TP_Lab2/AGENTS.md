@@ -13,12 +13,12 @@
 - $e_{ss} = 0$ para escalón unitario
 
 ## 3. Estructura de Archivos
-- `consigna_TP_Lab2.pdf`: enunciado y anexo de Simscape (Tabla A0 con los parámetros del TL081).
-- `figuras/`: esquemas y gráficos del informe.
-- `TP_Lab2.m`: script principal de simulación y cálculo de la Primera Parte (Control P).
-- `TP_Lab2_TL081.slx`: modelo circuital en Simscape con operacionales reales TL081 para el lazo con control P.
-- `TP_Lab2_PI.m`: script de cálculo analítico y diseño por LGR de la Segunda Parte (Control PI).
-- `TP_Lab2_GomezPizarro_Rodriguez.tex` / `.pdf`: informe del trabajo de laboratorio.
+- consigna_TP_Lab2.pdf: enunciado y anexo de Simscape (Tabla A0 con los parámetros del TL081).
+- iguras/: esquemas y gráficos del informe.
+- TP_Lab2.m: script único y autocontenido con todos los cálculos, diseños (P y PI) y simulaciones.
+- TP_Lab2_TL081.slx: modelo circuital en Simscape con operacionales reales TL081 para el lazo con control P.
+- TP_Lab2_PI_TL081.slx: modelo circuital en Simscape con operacionales reales TL081 para el lazo con control PI.
+- TP_Lab2_GomezPizarro_Rodriguez.tex / .pdf: informe del trabajo de laboratorio.
 
 ## 4. Entrega
 Informe con resumen teórico, deducciones completas, resultados de simulación con las comparaciones solicitadas y conclusiones. Se adjuntan los `.mlx` y `.slx`; las figuras del informe deben poder regenerarse ejecutando esos archivos.
