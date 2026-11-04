@@ -34,63 +34,34 @@
 Las especificaciones requeridas para el sistema en lazo cerrado son:
 \begin{itemize}
     \item $PO \le 5\%$
-    \item $T_s \le 0{,}10\text{ s}$ (criterio del $2\%$)
-    \item $e_{ss} = 0$ ante escalón unitario
+    \item $T_s \le 0{,}10\text{ s}$
+    \item $e_{ss} = 0$ para escalón unitario
 \end{itemize}
 
 \subsection*{Punto 1. Ajuste de $k_p$ mediante el Lugar de las Raíces}
 
-De antemano se observa que la planta a controlar no posee polos en el origen, por lo que es un sistema de \textbf{Tipo 0}. En consecuencia, ante una entrada escalón, la constante estática de error de posición es finita ($K_p^{\text{pos}} = k_p$), lo que determina un error estacionario no nulo para cualquier valor finito de ganancia:
+De antemano se observa que la planta es un sistema de \textbf{Tipo 0} (no posee polos en el origen en lazo abierto). Para una entrada escalón unitario, el error en estado estacionario resulta:
 \begin{equation}
-    e_{ss} = \frac{1}{1 + k_p} \ne 0 \quad \forall k_p < \infty
+    e_{ss} = \frac{1}{1 + k_p}
 \end{equation}
-Por este motivo, la especificación $e_{ss} = 0$ es físicamente imposible de cumplir con un control proporcional puro.
+Para cualquier valor finito de $k_p$, $e_{ss} > 0$. Por lo tanto, la especificación de \textbf{$e_{ss} = 0$ no puede cumplirse} con este controlador.
 
-Considerando las etapas pasivas desacopladas por el seguidor de tensión $U_{3A}$, la función de transferencia de la planta sin incluir la ganancia $k_p$ es:
+La función de transferencia de la planta sin considerar la ganancia $k_p$ es:
 \begin{equation}
-    G(s) = \frac{1}{(R_1 C_1 s + 1)(R_2 C_2 s + 1)} = \frac{1}{(0{,}01s + 1)(0{,}0047s + 1)} = \frac{21276{,}6}{(s + 100)(s + 212{,}77)}
-\end{equation}
-
-La ecuación característica en lazo cerrado con realimentación unitaria es:
-\begin{equation}
-    1 + k_p G(s) = 0 \iff s^2 + 312{,}77\,s + 21276{,}6\,(1 + k_p) = 0
+    G(s) = \frac{1}{(0{,}01s + 1)(0{,}0047s + 1)} = \frac{21276{,}6}{(s + 100)(s + 212{,}77)}
 \end{equation}
 
-Al comparar con la forma estándar $s^2 + 2\xi\omega_n s + \omega_n^2 = 0$, se obtiene:
+A partir del trazado del Lugar de las Raíces de $G(s)$ y superponiendo la línea de amortiguamiento $\xi = 0{,}69$ (correspondiente al límite de $PO \le 5\%$), se determina mediante la herramienta interactiva el valor de ganancia en la intersección con las ramas:
 \begin{equation}
-    2\xi\omega_n = 312{,}77 \implies \sigma = \xi\omega_n = 156{,}38\text{ rad/s}
+    k_p = 1{,}41
 \end{equation}
 
-El punto de ruptura del LGR se ubica sobre el eje real en:
-\begin{equation}
-    s = \frac{-100 - 212{,}77}{2} = -156{,}38\text{ rad/s}
-\end{equation}
-A partir de este punto, las ramas complejas se desplazan verticalmente a lo largo de la recta $\text{Re}(s) = -156{,}38$. Dado que la parte real es fija, el tiempo de establecimiento resulta:
-\begin{equation}
-    T_s \approx \frac{4}{\xi\omega_n} = \frac{4}{156{,}38} \approx 0{,}0256\text{ s} \le 0{,}10\text{ s}
-\end{equation}
-Por ende, la condición de $T_s \le 0{,}10\text{ s}$ se satisface para cualquier valor de $k_p$ que genere polos complejos ($k_p > 0{,}15$).
-
-Para satisfacer la restricción de sobrepaso se impone:
-\begin{equation}
-    PO \le 5\% \implies \xi \ge \frac{-\ln(0{,}05)}{\sqrt{\pi^2 + \ln^2(0{,}05)}} \approx 0{,}69
-\end{equation}
-
-Para reducir al mínimo el error estacionario $e_{ss}$, conviene elegir el mayor valor de ganancia posible dentro del margen permitido, es decir, $\xi = 0{,}69$:
-\begin{equation}
-    \omega_n = \frac{156{,}38}{0{,}69} \approx 226{,}64\text{ rad/s} \implies \omega_n^2 \approx 51365\text{ rad}^2/\text{s}^2
-\end{equation}
-Igualando con el término independiente:
-\begin{equation}
-    21276{,}6\,(1 + k_p) = 51365 \implies k_p \approx 1{,}41
-\end{equation}
-
-Con $k_p = 1{,}41$ se cumplen $PO \le 5\%$ y $T_s \le 0{,}10\text{ s}$, quedando como única especificación no satisfecha $e_{ss} = 0$, con un valor residual de $e_{ss} = 1/(1 + 1{,}41) \approx 0{,}415$ ($41{,}5\%$).
+Para este valor, los polos en lazo cerrado se ubican en $s_{1,2} \approx -156{,}4 \pm j 164{,}0\text{ rad/s}$. Dado que la parte real es $\sigma = -156{,}4\text{ rad/s}$, el tiempo de establecimiento es de aproximadamente $25{,}6\text{ ms}$, cumpliendo holgadamente con $T_s \le 0{,}10\text{ s}$.
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.75\textwidth]{figuras/punto1_lgr.png}
-    \caption{Lugar geométrico de las raíces de $G(s)$ con la línea de amortiguamiento $\xi = 0{,}69$ y el punto de diseño $k_p = 1{,}41$.}
+    \includegraphics[width=0.7\textwidth]{figuras/punto1_lgr.png}
+    \caption{Lugar de las Raíces de $G(s)$, línea de diseño $\xi = 0{,}69$ y polos en lazo cerrado para $k_p = 1{,}41$.}
     \label{fig:punto1_lgr}
 \end{figure}
 
