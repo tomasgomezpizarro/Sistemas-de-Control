@@ -70,12 +70,7 @@ A partir del trazado del Lugar de las Raíces de $G(s)$ en MATLAB (Fig. \ref{fig
     \end{equation}
     Esto delimita una región admisible en el plano complejo entre las rectas radiales de $\xi = 0{,}69$. Si bien para $k_p < 0{,}15$ el sistema es sobreamortiguado y no presenta sobrepaso ($PO = 0\%$), un valor menor de $k_p$ resulta desfavorable, ya que una de las raíces reales se desplaza hacia el origen (hacia $-100\text{ rad/s}$), volviendo la respuesta más lenta, y además el error estacionario $e_{ss} = 1/(1 + k_p)$ aumenta considerablemente.
 
-    \item \textbf{Criterio de selección de $k_p$:} Dentro de la región admisible, conviene seleccionar la máxima ganancia posible ($k_p \approx 1{,}4$) debido a que:
-    \begin{enumerate}
-        \item Minimiza el error en estado estacionario $e_{ss}$.
-        \item Sitúa al sistema dentro del rango de amortiguamiento considerado óptimo ($0{,}6 \le \xi \le 0{,}8$).
-        \item Maximiza la frecuencia natural $\omega_n$, disminuyendo los tiempos de subida y de pico.
-    \end{enumerate}
+    \item \textbf{Criterio de selección de $k_p$:} Dado que se busca minimizar el error en régimen permanente $e_{ss} = 1/(1 + k_p)$, el objetivo principal es maximizar la ganancia $k_p$ tanto como lo permitan las especificaciones. Al seleccionar el valor máximo admisible en la frontera de $PO \le 5\%$ ($k_p \approx 1{,}4$), el factor de amortiguamiento resultante queda en $\xi \approx 0{,}69$, ubicándose oportunamente dentro del rango considerado óptimo en ingeniería ($0{,}6 \le \xi \le 0{,}8$). A su vez, esta mayor ganancia maximiza la frecuencia natural $\omega_n$, lo que disminuye los tiempos de subida y de pico del sistema.
 \end{itemize}
 
 Mediante la herramienta interactiva de MATLAB se selecciona el punto sobre la cota $\xi = 0{,}69$, obteniéndose:
