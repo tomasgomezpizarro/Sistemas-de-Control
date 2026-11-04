@@ -153,4 +153,46 @@ Se recalculan las medidas de desempeño mediante \texttt{stepinfo} y se comparan
 
 Se comprueba que el sobrepaso resultante es $PO = 4{,}98\% \le 5\%$, por lo que la especificación de sobrepaso \textbf{se sigue cumpliendo} estrictamente con los valores comerciales de la serie E24.
 
+
+\subsection*{Punto 4. Simulación circuital del lazo cerrado en Simscape}
+
+Se implementa el circuito completo de la Fig. 2 en Simscape (\texttt{TP\_Lab2\_TL081.slx}) tomando como base el modelo validado en el Trabajo de Laboratorio 1. Los tres amplificadores operacionales ($U_{1A}$, $U_{3A}$ y $U_{2A}$) se configuran con el bloque \textit{Band-Limited Op-Amp} utilizando los parámetros del TL081 de la Tabla A0 del Anexo (ganancia $A = 2\cdot 10^5$, saturación en $\pm 8{,}5\text{ V}$, $SR = 13\text{ V}/\mu\text{s}$ y $BW = 15\text{ Hz}$), e incorporando las resistencias comerciales obtenidas en el Punto 3 ($R_7 = 1{,}6\text{ k}\Omega$ y $R_9 = 3{,}9\text{ k}\Omega$). La simulación se ejecuta con el solver \texttt{ode23t} y un paso máximo limitado a $10\ \mu\text{s}$.
+
+En la Fig. \ref{fig:punto4_simscape} se superponen la respuesta temporal simulada en Simscape y la del modelo lineal por función de transferencia $T(s)$ ante una entrada escalón unitario.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\textwidth]{figuras/punto4_simscape_vs_ft.png}
+    \caption{Superposición de la respuesta al escalón: Modelo por FT vs. Simscape con op-amps reales TL081 ($k_p \approx 1{,}41$).}
+    \label{fig:punto4_simscape}
+\end{figure}
+
+Ambas curvas resultan visualmente indistinguibles. Cuantificando la diferencia instantánea mediante interpolación numérica, el error máximo obtenido es:
+\begin{equation}
+    \max_t |y_{\text{Simscape}}(t) - y_{\text{FT}}(t)| = 1{,}71 \cdot 10^{-5}\text{ V} \approx 0{,}017\text{ mV}
+\end{equation}
+lo que ratifica una correspondencia prácticamente exacta entre el comportamiento circuital y el modelo teórico.
+
+En el Cuadro \ref{tab:punto4_comparacion} se resumen las medidas de desempeño calculadas con \texttt{stepinfo} a partir de los datos simulados y se contrastan con las del modelo lineal.
+
+\begin{table}[H]
+    \centering
+    \caption{Comparación entre el modelo por función de transferencia y la simulación circuital en Simscape con op-amps reales TL081.}
+    \vspace{2mm}
+    \begin{tabular}{lcccc}
+        \toprule
+        \textbf{Métrica} & \textbf{Requerido} & \textbf{Modelo FT} & \textbf{Simscape (TL081)} & \textbf{Cumple} \\
+        \midrule
+        Sobrepaso ($PO$) & $\le 5\%$ & $4{,}98\%$ & $4{,}98\%$ & Sí \\
+        Tiempo de estab. ($T_s$) & $\le 0{,}10\text{ s}$ & $26{,}5\text{ ms}$ & $26{,}5\text{ ms}$ & Sí \\
+        Tiempo de pico ($T_p$) & -- & $19{,}1\text{ ms}$ & $19{,}2\text{ ms}$ & -- \\
+        Valor final ($y_\infty$) & $1{,}00\text{ V}$ & $0{,}5851\text{ V}$ & $0{,}5851\text{ V}$ & -- \\
+        Error estacionario ($e_{ss}$) & $0$ & $41{,}49\%$ & $41{,}49\%$ & No \\
+        \bottomrule
+    \end{tabular}
+    \label{tab:punto4_comparacion}
+\end{table}
+
+Dado que para un escalón de $1\text{ V}$ las tensiones nodales no se aproximan a la saturación ($\pm 8{,}5\text{ V}$) ni la pendiente de las transiciones es limitada por el \textit{slew rate}, los amplificadores operan plenamente en su régimen lineal, convalidando de manera directa las predicciones del modelo por función de transferencia.
+
 \end{document}

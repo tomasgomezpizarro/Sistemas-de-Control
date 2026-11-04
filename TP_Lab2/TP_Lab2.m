@@ -50,7 +50,7 @@ y_inf = dcgain(T);
 ess   = 1 - y_inf;
 
 fprintf('\n=== PUNTO 2: MÉTRICAS DE LA RESPUESTA AL ESCALÓN (kp = %.2f) ===\n', kp);
-fprintf('Sobrepaso (PO):                 %.2f %%  (Especificación: <= 5 %%)\n', info.Overshoot);
+fprintf('Sobrepaso (PO):                 %.4f %%  (Especificación: <= 5 %%)\n', info.Overshoot);
 fprintf('Tiempo de establecimiento (Ts): %.4f s (%.2f ms)  (Especificación: <= 0.10 s)\n', info.SettlingTime, info.SettlingTime*1e3);
 fprintf('Tiempo de pico (Tp):            %.4f s (%.2f ms)\n', info.PeakTime, info.PeakTime*1e3);
 fprintf('Valor en estado estacionario:   %.4f V\n', y_inf);
@@ -82,8 +82,55 @@ ess_real   = 1 - y_inf_real;
 
 fprintf('\n=== PUNTO 3: VALORES COMERCIALES E24 (R7 = %.1f kOhm, R9 = %.1f kOhm) ===\n', R7*1e-3, R9*1e-3);
 fprintf('kp obtenido con E24:            %.6f\n', kp_real);
-fprintf('Sobrepaso (PO):                 %.2f %%  (Especificación: <= 5 %%)\n', info_real.Overshoot);
+fprintf('Sobrepaso (PO):                 %.4f %%  (Especificación: <= 5 %%)\n', info_real.Overshoot);
 fprintf('Tiempo de establecimiento (Ts): %.4f s (%.2f ms)  (Especificación: <= 0.10 s)\n', info_real.SettlingTime, info_real.SettlingTime*1e3);
 fprintf('Tiempo de pico (Tp):            %.4f s (%.2f ms)\n', info_real.PeakTime, info_real.PeakTime*1e3);
 fprintf('Valor en estado estacionario:   %.4f V\n', y_inf_real);
 fprintf('Error estacionario (ess):       %.4f (%.2f %%)  (Especificación: = 0)\n', ess_real, ess_real*100);
+
+
+%% Punto 4: Simulación circuital en Simscape con op-amps TL081 (Fig. 2)
+% Se carga el modelo circuital con componentes comerciales (R7=1.6k, R9=3.9k)
+% y modelos reales Band-Limited Op-Amp para los operacionales TL081.
+mdl = 'TP_Lab2_TL081';
+load_system(fullfile(script_dir, [mdl '.slx']));
+
+out_sim = sim(mdl);
+t_sim   = out_sim.simlog.Voltage_Sensor.V.series.time;
+y_sim   = out_sim.simlog.Voltage_Sensor.V.series.values;
+
+% Grilla temporal uniforme para evaluar la función de transferencia T_real
+t_unif = linspace(0, max(t_sim), 5000)';
+y_ft   = step(T_real, t_unif);
+
+% Interpolación para calcular el error máximo instantáneo
+[t_sim_u, idx_u] = unique(t_sim);
+y_sim_interp     = interp1(t_sim_u, y_sim(idx_u), t_unif, 'pchip');
+err_max_p4       = max(abs(y_sim_interp - y_ft));
+
+% Medición de parámetros sobre la simulación en Simscape
+y_inf_sim = y_sim(end);
+ess_sim   = 1 - y_inf_sim;
+info_sim  = stepinfo(y_sim, t_sim, y_inf_sim);
+
+fprintf('\n=== PUNTO 4: SIMULACIÓN EN SIMSCAPE CON TL081 (R7 = 1.6k, R9 = 3.9k) ===\n');
+fprintf('Error máximo |y(Simscape) - y(FT)|: %.4e V (%.3f mV)\n', err_max_p4, err_max_p4*1e3);
+fprintf('Sobrepaso Simscape (PO):            %.2f %%  (FT: %.2f %%)\n', info_sim.Overshoot, info_real.Overshoot);
+fprintf('Tiempo de estab. Simscape (Ts):     %.4f s (%.2f ms)  (FT: %.2f ms)\n', info_sim.SettlingTime, info_sim.SettlingTime*1e3, info_real.SettlingTime*1e3);
+fprintf('Tiempo de pico Simscape (Tp):       %.4f s (%.2f ms)  (FT: %.2f ms)\n', info_sim.PeakTime, info_sim.PeakTime*1e3, info_real.PeakTime*1e3);
+fprintf('Valor final Simscape:               %.4f V  (FT: %.4f V)\n', y_inf_sim, y_inf_real);
+fprintf('Error estacionario Simscape (ess):  %.4f (%.2f %%)  (FT: %.2f %%)\n', ess_sim, ess_sim*100, ess_real*100);
+
+% Superposición gráfica de la respuesta al escalón: FT vs Simscape
+fig4 = figure('Name', 'Punto 4: Superposición FT vs Simscape TL081', 'Position', [100, 100, 720, 420]);
+plot(t_unif * 1e3, y_ft, 'b-', 'LineWidth', 2.0, 'DisplayName', 'Modelo Lineal FT (T_{real})');
+hold on;
+plot(t_sim * 1e3, y_sim, 'r--', 'LineWidth', 1.4, 'DisplayName', 'Circuito Simscape (TL081)');
+grid on;
+title('Respuesta al escalón unitario: Modelo por FT vs. Simscape (TL081, k_p \approx 1.41)');
+xlabel('Tiempo (ms)');
+ylabel('Tensión de salida (V)');
+legend('Location', 'southeast');
+saveas(fig4, fullfile(fig_dir, 'punto4_simscape_vs_ft.png'));
+close(fig4);
+close_system(mdl);
