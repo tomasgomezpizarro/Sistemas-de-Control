@@ -40,12 +40,12 @@ Las especificaciones requeridas para el sistema en lazo cerrado son:
 
 \subsection*{Punto 1. Ajuste de $k_p$ mediante el Lugar de las Raíces}
 
-La planta a controlar está formada por dos etapas pasa-bajos desacopladas. Su función de transferencia a lazo abierto (sin considerar la ganancia $k_p$) es:
+La función de transferencia a lazo abierto se modela como la cascada entre la dinámica fija de la planta, $G(s)$, y la ganancia proporcional ajustable del controlador, $k_p$, resultando $L(s) = k_p \cdot G(s)$ con:
 \begin{equation}
     G(s) = \frac{1}{(R_1 C_1 s + 1)(R_2 C_2 s + 1)} = \frac{1}{(0{,}01s + 1)(0{,}0047s + 1)}
 \end{equation}
 
-El sistema es de \textbf{Tipo 0}, ya que no posee polos en el origen en lazo abierto. Ante una entrada escalón unitario $R(s) = 1/s$, la constante estática de error de posición con control proporcional $k_p$ es:
+El sistema es de \textbf{Tipo 0}, ya que no posee polos en el origen en lazo abierto. Ante una entrada escalón unitario $R(s) = 1/s$, la constante estática de error de posición es:
 \begin{equation}
     K_p^{\text{pos}} = \lim_{s \to 0} k_p G(s) = k_p
 \end{equation}
@@ -53,32 +53,36 @@ Por lo tanto, el error en régimen permanente resulta:
 \begin{equation}
     e_{ss} = \frac{1}{1 + K_p^{\text{pos}}} = \frac{1}{1 + k_p}
 \end{equation}
-Dado que para cualquier ganancia finita $k_p < \infty$ el error es estrictamente positivo, la especificación de \textbf{$e_{ss} = 0$ no puede cumplirse} con un control proporcional puro. Lograr un error nulo requeriría una ganancia infinita, lo cual físicamente saturaría los componentes y no es realizable.
+Dado que para cualquier ganancia finita $k_p < \infty$ el error es estrictamente positivo, la especificación de \textbf{$e_{ss} = 0$ no puede cumplirse} con un control proporcional puro. Lograr un error nulo requeriría una ganancia infinita, lo cual no es físicamente realizable.
 
 A partir del trazado del Lugar de las Raíces de $G(s)$ en MATLAB (Fig. \ref{fig:punto1_lgr}), se analizan las especificaciones restantes:
 
 \begin{itemize}
-    \item \textbf{Tiempo de establecimiento ($T_s \le 0{,}10\text{ s}$):} Como se observó en el Trabajo de Laboratorio 1, las ramas del LGR se desplazan verticalmente a lo largo de $\text{Re}(s) = \sigma = -156{,}4\text{ rad/s}$ una vez superado el punto de ruptura ($k_p \ge 0{,}15$). Dado que la parte real es independiente del valor de $k_p$ en dicha región, el tiempo de establecimiento al $2\%$ resulta:
+    \item \textbf{Tiempo de establecimiento ($T_s \le 0{,}10\text{ s}$):} Como se analizó en el Trabajo de Laboratorio 1, una vez superado el punto de ruptura ($k_p \ge 0{,}15$), las ramas del LGR se desplazan verticalmente a lo largo de una parte real fija dada por $\xi\omega_n = 156{,}4\text{ rad/s}$, independiente del valor de $k_p$. El tiempo de establecimiento al $2\%$ resulta:
     \begin{equation}
-        T_s \approx \frac{4}{\sigma} = \frac{4}{156{,}4} \approx 0{,}0256\text{ s}
+        T_s \approx \frac{4}{\xi\omega_n} = \frac{4}{156{,}4} \approx 0{,}0256\text{ s}
     \end{equation}
-    Este valor es constante ($\approx 25{,}6\text{ ms}$) y cumple holgadamente con la cota de $0{,}10\text{ s}$ para cualquier valor de $k_p$ que genere polos complejos.
+    Este valor ($\approx 25{,}6\text{ ms}$) satisface holgadamente la cota de $0{,}10\text{ s}$ para cualquier par de polos complejos.
 
-    \item \textbf{Sobrepaso ($PO \le 5\%$):} Para limitar el sobrepaso al $5\%$, el factor de amortiguamiento debe cumplir $\xi \ge 0{,}69$. En el gráfico, esto define una región admisible comprendida entre las dos rectas radiales de $\xi = 0{,}69$, lo que otorga libertad para seleccionar cualquier ganancia en el rango $0{,}15 \le k_p \le 1{,}41$.
+    \item \textbf{Sobrepaso ($PO \le 5\%$):} A partir de la expresión analítica del sobrepaso para un sistema de segundo orden:
+    \begin{equation}
+        PO = 100 \cdot e^{-\frac{\pi \xi}{\sqrt{1 - \xi^2}}} \le 5\% \implies \xi \ge \frac{-\ln(0{,}05)}{\sqrt{\pi^2 + \ln^2(0{,}05)}} \approx 0{,}69
+    \end{equation}
+    Esto delimita una región admisible en el plano complejo entre las rectas radiales de $\xi = 0{,}69$. Si bien para $k_p < 0{,}15$ el sistema es sobreamortiguado y no presenta sobrepaso ($PO = 0\%$), un valor menor de $k_p$ resulta desfavorable, ya que una de las raíces reales se desplaza hacia el origen (hacia $-100\text{ rad/s}$), volviendo la respuesta más lenta, y además el error estacionario $e_{ss} = 1/(1 + k_p)$ aumenta considerablemente.
 
-    \item \textbf{Criterio de selección de $k_p$:} Dentro del intervalo admisible, se elige el valor de ganancia más alto posible ($k_p \approx 1{,}4$) por las siguientes razones:
+    \item \textbf{Criterio de selección de $k_p$:} Dentro de la región admisible, conviene seleccionar la máxima ganancia posible ($k_p \approx 1{,}4$) debido a que:
     \begin{enumerate}
-        \item Minimiza el error en régimen permanente $e_{ss} = 1/(1 + k_p)$.
-        \item Se ubica dentro del rango de amortiguamiento considerado óptimo desde el punto de vista del compromiso entre rapidez y oscilación ($0{,}6 \le \xi \le 0{,}8$).
-        \item Maximiza la frecuencia natural $\omega_n$, reduciendo los tiempos de subida y de pico del sistema.
+        \item Minimiza el error en estado estacionario $e_{ss}$.
+        \item Sitúa al sistema dentro del rango de amortiguamiento considerado óptimo ($0{,}6 \le \xi \le 0{,}8$).
+        \item Maximiza la frecuencia natural $\omega_n$, disminuyendo los tiempos de subida y de pico.
     \end{enumerate}
 \end{itemize}
 
-Mediante la herramienta interactiva de MATLAB se selecciona el punto sobre la frontera $\xi = 0{,}69$, obteniéndose:
+Mediante la herramienta interactiva de MATLAB se selecciona el punto sobre la cota $\xi = 0{,}69$, obteniéndose:
 \begin{equation}
     k_p \approx 1{,}40
 \end{equation}
-cuyos polos en lazo cerrado se sitúan en $s_{1,2} \approx -156 \pm j 163\text{ rad/s}$, con un amortiguamiento $\xi = 0{,}692$ y un sobrepaso de $PO = 4{,}9\%$. Cabe destacar que, al seleccionar resistencias comerciales en etapas posteriores, convendrá redondear la ganancia resultante ligeramente hacia abajo para evitar que las tolerancias superen la cota de sobrepaso.
+con polos en lazo cerrado en $s_{1,2} \approx -156 \pm j 163\text{ rad/s}$, $\xi = 0{,}692$ y $PO = 4{,}9\%$. Cabe considerar que al implementar el circuito con resistencias comerciales de la serie E24 en el Punto 3, convendrá redondear la ganancia resultante ligeramente hacia abajo para evitar que las tolerancias superen la cota de sobrepaso del $5\%$.
 
 \begin{figure}[H]
     \centering
