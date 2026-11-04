@@ -336,8 +336,64 @@ legend('Location', 'southeast');
 saveas(fig_step, fullfile(fig_dir, 'pi_punto3_escalon_e24.png'));
 close(fig_step);
 
+%% =========================================================================
+%% 5. PUNTO 4: SIMULACIÓN CIRCUITAL EN SIMSCAPE CON TL081 (FIGURA 5)
+%% =========================================================================
+% 4.a: Superposición de la respuesta al escalón: FT vs Simscape (TL081)
+mdl_pi = 'TP_Lab2_PI_TL081';
+if exist([mdl_pi '.slx'], 'file') || exist(fullfile(script_dir, [mdl_pi '.slx']), 'file')
+    load_system(fullfile(script_dir, [mdl_pi '.slx']));
+    set_param(mdl_pi, 'StopTime', '0.12');
+    set_param(mdl_pi, 'SimscapeLogLimitData', 'off');
+    set_param(mdl_pi, 'LimitDataPoints', 'off');
+    
+    out_sim = sim(mdl_pi);
+    t_sim   = out_sim.simlog.Voltage_Sensor.V.series.time;
+    y_sim   = out_sim.simlog.Voltage_Sensor.V.series.values;
+    vo1_sim = out_sim.simlog.Sensor_Vo1.V.series.values;
+    vpi_sim = out_sim.simlog.Sensor_Vpi.V.series.values;
+
+    t_unif = linspace(0, max(t_sim), 5000)';
+    y_ft   = step(T_com, t_unif);
+
+    [t_sim_u, idx_u] = unique(t_sim);
+    y_sim_interp     = interp1(t_sim_u, y_sim(idx_u), t_unif, 'pchip');
+    err_max_p4       = max(abs(y_sim_interp - y_ft));
+
+    y_inf_sim = y_sim(end);
+    ess_sim   = 1 - y_inf_sim;
+    info_sim  = stepinfo(y_sim, t_sim, y_inf_sim);
+
+    fprintf('\n=== PUNTO 4.a: SIMULACIÓN EN SIMSCAPE CON TL081 (FIG. 5) ===\n');
+    fprintf('Error máximo |y(Simscape) - y(FT)|: %.4e V (%.3f mV)\n', err_max_p4, err_max_p4*1e3);
+    fprintf('Sobrepaso Simscape (PO):            %.2f %%  (FT: %.2f %%)\n', info_sim.Overshoot, info_com.Overshoot);
+    fprintf('Tiempo de estab. Simscape (Ts):     %.4f s (%.2f ms)  (FT: %.2f ms)\n', info_sim.SettlingTime, info_sim.SettlingTime*1e3, info_com.SettlingTime*1e3);
+    fprintf('Tiempo de pico Simscape (Tp):       %.4f s (%.2f ms)  (FT: %.2f ms)\n', info_sim.PeakTime, info_sim.PeakTime*1e3, info_com.PeakTime*1e3);
+    fprintf('Valor final Simscape:               %.4f V  (FT: %.4f V)\n', y_inf_sim, y_inf_com);
+    fprintf('Error estacionario Simscape (ess):  %.4f (%.2f %%)  (FT: %.2f %%)\n', ess_sim, ess_sim*100, ess_com*100);
+
+    fig4a = figure('Name', 'Punto 4.a: Superposición FT vs Simscape TL081 (PI)', 'Position', [100, 100, 720, 420], 'Visible', 'off');
+    plot(t_unif * 1e3, y_ft, 'b-', 'LineWidth', 2.0, 'DisplayName', 'Modelo Lineal FT (T_{com})');
+    hold on;
+    plot(t_sim * 1e3, y_sim, 'r--', 'LineWidth', 1.4, 'DisplayName', 'Circuito Simscape (TL081)');
+    yline(1.0, 'k:');
+    yline(1.02, 'g:', 'LineWidth', 0.8, 'DisplayName', 'Banda \pm 2%');
+    yline(0.98, 'g:', 'LineWidth', 0.8, 'HandleVisibility', 'off');
+    grid on;
+    title('Respuesta al escalón unitario: Modelo por FT vs. Simscape (Controlador PI, TL081)');
+    xlabel('Tiempo (ms)');
+    ylabel('Tensión de salida y(t) [V]');
+    legend('Location', 'southeast');
+    saveas(fig4a, fullfile(fig_dir, 'pi_punto4a_simscape_vs_ft.png'));
+    close(fig4a);
+    close_system(mdl_pi, 0);
+else
+    fprintf('\n[Aviso] No se encontró el modelo %s.slx en el directorio.\n', mdl_pi);
+end
+
 fprintf('\nFiguras guardadas en %s:\n', fig_dir);
 fprintf('- pi_punto2_comparacion_z.png\n');
 fprintf('- pi_punto2_lgr.png\n');
 fprintf('- pi_punto2_efecto_cero.png\n');
 fprintf('- pi_punto3_escalon_e24.png\n');
+fprintf('- pi_punto4a_simscape_vs_ft.png\n');

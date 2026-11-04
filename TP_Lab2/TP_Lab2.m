@@ -37,13 +37,15 @@ G
 %% =========================================================================
 
 %% Punto 1: Lugar de las Raíces para ajuste de kp
-figure('Name', 'Parte 1 - Punto 1: Lugar de las Raíces - Planta G(s)');
+fig1 = figure('Name', 'Parte 1 - Punto 1: Lugar de las Raíces - Planta G(s)', 'Position', [100, 100, 700, 480], 'Visible', 'off');
 rlocus(G);
 sgrid(0.69, []);
 title('Lugar de las Raíces de G(s) - Control Proporcional');
 xlabel('Eje Real (1/s)');
 ylabel('Eje Imaginario (rad/s)');
 grid on;
+saveas(fig1, fullfile(fig_dir, 'punto1_lgr.png'));
+close(fig1);
 
 %% Punto 2: Verificación de la respuesta al escalón en lazo cerrado
 kp = 1.41;
@@ -61,13 +63,14 @@ fprintf('Valor en estado estacionario:   %.4f V\n', y_inf);
 fprintf('Error estacionario (ess):       %.4f (%.2f %%)  (Especificación: = 0)\n', ess, ess*100);
 
 % Gráfico de la respuesta al escalón
-fig2 = figure('Name', 'Parte 1 - Punto 2: Respuesta al escalón (kp = 1.41)');
+fig2 = figure('Name', 'Parte 1 - Punto 2: Respuesta al escalón (kp = 1.41)', 'Position', [100, 100, 700, 440], 'Visible', 'off');
 step(T);
 grid on;
 title(sprintf('Respuesta al escalón en lazo cerrado (k_p = %.2f)', kp));
 xlabel('Tiempo (s)');
 ylabel('Amplitud (V)');
 saveas(fig2, fullfile(fig_dir, 'punto2_escalon.png'));
+close(fig2);
 
 %% Punto 3: Elección de valores comerciales (serie E24) para R7 y R9
 R7 = 1.6e3;    % 1.6 kOhm (E24)
@@ -88,45 +91,49 @@ fprintf('Valor en estado estacionario:   %.4f V\n', y_inf_real);
 fprintf('Error estacionario (ess):       %.4f (%.2f %%)  (Especificación: = 0)\n', ess_real, ess_real*100);
 
 %% Punto 4: Simulación circuital en Simscape con op-amps TL081 (Fig. 2)
-mdl = 'TP_Lab2_TL081';
-if exist([mdl '.slx'], 'file') || exist(fullfile(script_dir, [mdl '.slx']), 'file')
-    load_system(fullfile(script_dir, [mdl '.slx']));
-    out_sim = sim(mdl);
-    t_sim   = out_sim.simlog.Voltage_Sensor.V.series.time;
-    y_sim   = out_sim.simlog.Voltage_Sensor.V.series.values;
+mdl_p = 'TP_Lab2_TL081';
+if exist([mdl_p '.slx'], 'file') || exist(fullfile(script_dir, [mdl_p '.slx']), 'file')
+    load_system(fullfile(script_dir, [mdl_p '.slx']));
+    set_param(mdl_p, 'StopTime', '0.12');
+    set_param(mdl_p, 'SimscapeLogLimitData', 'off');
+    set_param(mdl_p, 'LimitDataPoints', 'off');
+    out_sim_p = sim(mdl_p);
+    t_sim_p   = out_sim_p.simlog.Voltage_Sensor.V.series.time;
+    y_sim_p   = out_sim_p.simlog.Voltage_Sensor.V.series.values;
 
-    t_unif = linspace(0, max(t_sim), 5000)';
-    y_ft   = step(T_real, t_unif);
+    t_unif_p = linspace(0, max(t_sim_p), 5000)';
+    y_ft_p   = step(T_real, t_unif_p);
 
-    [t_sim_u, idx_u] = unique(t_sim);
-    y_sim_interp     = interp1(t_sim_u, y_sim(idx_u), t_unif, 'pchip');
-    err_max_p4       = max(abs(y_sim_interp - y_ft));
+    [t_sim_p_u, idx_p_u] = unique(t_sim_p);
+    y_sim_p_interp       = interp1(t_sim_p_u, y_sim_p(idx_p_u), t_unif_p, 'pchip');
+    err_max_p4           = max(abs(y_sim_p_interp - y_ft_p));
 
-    y_inf_sim = y_sim(end);
-    ess_sim   = 1 - y_inf_sim;
-    info_sim  = stepinfo(y_sim, t_sim, y_inf_sim);
+    y_inf_sim_p = y_sim_p(end);
+    ess_sim_p   = 1 - y_inf_sim_p;
+    info_sim_p  = stepinfo(y_sim_p, t_sim_p, y_inf_sim_p);
 
     fprintf('\n=== PARTE 1 - PUNTO 4: SIMULACIÓN EN SIMSCAPE CON TL081 ===\n');
     fprintf('Error máximo |y(Simscape) - y(FT)|: %.4e V (%.3f mV)\n', err_max_p4, err_max_p4*1e3);
-    fprintf('Sobrepaso Simscape (PO):            %.2f %%  (FT: %.2f %%)\n', info_sim.Overshoot, info_real.Overshoot);
-    fprintf('Tiempo de estab. Simscape (Ts):     %.4f s (%.2f ms)  (FT: %.2f ms)\n', info_sim.SettlingTime, info_sim.SettlingTime*1e3, info_real.SettlingTime*1e3);
-    fprintf('Tiempo de pico Simscape (Tp):       %.4f s (%.2f ms)  (FT: %.2f ms)\n', info_sim.PeakTime, info_sim.PeakTime*1e3, info_real.PeakTime*1e3);
-    fprintf('Valor final Simscape:               %.4f V  (FT: %.4f V)\n', y_inf_sim, y_inf_real);
-    fprintf('Error estacionario Simscape (ess):  %.4f (%.2f %%)  (FT: %.2f %%)\n', ess_sim, ess_sim*100, ess_real*100);
+    fprintf('Sobrepaso Simscape (PO):            %.2f %%  (FT: %.2f %%)\n', info_sim_p.Overshoot, info_real.Overshoot);
+    fprintf('Tiempo de estab. Simscape (Ts):     %.4f s (%.2f ms)  (FT: %.2f ms)\n', info_sim_p.SettlingTime, info_sim_p.SettlingTime*1e3, info_real.SettlingTime*1e3);
+    fprintf('Tiempo de pico Simscape (Tp):       %.4f s (%.2f ms)  (FT: %.2f ms)\n', info_sim_p.PeakTime, info_sim_p.PeakTime*1e3, info_real.PeakTime*1e3);
+    fprintf('Valor final Simscape:               %.4f V  (FT: %.4f V)\n', y_inf_sim_p, y_inf_real);
+    fprintf('Error estacionario Simscape (ess):  %.4f (%.2f %%)  (FT: %.2f %%)\n', ess_sim_p, ess_sim_p*100, ess_real*100);
 
-    fig4 = figure('Name', 'Parte 1 - Punto 4: Superposición FT vs Simscape TL081', 'Position', [100, 100, 720, 420]);
-    plot(t_unif * 1e3, y_ft, 'b-', 'LineWidth', 2.0, 'DisplayName', 'Modelo Lineal FT (T_{real})');
+    fig4 = figure('Name', 'Parte 1 - Punto 4: Superposición FT vs Simscape TL081', 'Position', [100, 100, 720, 420], 'Visible', 'off');
+    plot(t_unif_p * 1e3, y_ft_p, 'b-', 'LineWidth', 2.0, 'DisplayName', 'Modelo Lineal FT (T_{real})');
     hold on;
-    plot(t_sim * 1e3, y_sim, 'r--', 'LineWidth', 1.4, 'DisplayName', 'Circuito Simscape (TL081)');
+    plot(t_sim_p * 1e3, y_sim_p, 'r--', 'LineWidth', 1.4, 'DisplayName', 'Circuito Simscape (TL081)');
     grid on;
     title('Respuesta al escalón unitario: Modelo por FT vs. Simscape (TL081, k_p \approx 1.41)');
     xlabel('Tiempo (ms)');
     ylabel('Tensión de salida (V)');
     legend('Location', 'southeast');
     saveas(fig4, fullfile(fig_dir, 'punto4_simscape_vs_ft.png'));
-    close_system(mdl);
+    close(fig4);
+    close_system(mdl_p, 0);
 else
-    fprintf('\n[Aviso] No se encontró el modelo %s.slx en el directorio. Se omite simulación de Simscape.\n', mdl);
+    fprintf('\n[Aviso] No se encontró el modelo %s.slx en el directorio. Se omite simulación de Simscape.\n', mdl_p);
 end
 
 %% =========================================================================
@@ -152,7 +159,7 @@ fprintf('\n=== PARTE 2 - PUNTO 2.a: REQUISITOS EN EL PLANO s ===\n');
 fprintf('xi mínimo para PO <= 5%%:            %.4f (~0.69)\n', xi_min);
 fprintf('sigma mínimo (xi*wn) para Ts<=0.1s: %.2f rad/s\n', sigma_min);
 
-fig2a = figure('Name', 'Parte 2 - Punto 2.a: Región admisible en el plano s', 'Position', [100, 100, 700, 480]);
+fig2a = figure('Name', 'Parte 2 - Punto 2.a: Región admisible en el plano s', 'Position', [100, 100, 700, 480], 'Visible', 'off');
 hold on;
 sig_grid = linspace(-180, -sigma_min, 300);
 w_top = -sig_grid * tan(theta_rad);
@@ -179,8 +186,8 @@ legend('Location', 'southwest');
 text(-sigma_min - 3, 110, '\xi\omega_n = 40', 'Color', 'r', 'FontWeight', 'bold', 'HorizontalAlignment', 'right');
 text(-120, 125, 'Cono \xi \geq 0.69', 'Color', 'b', 'FontWeight', 'bold');
 text(-120, 20, {'Región', 'admisible'}, 'Color', [0 0.5 0], 'FontWeight', 'bold', 'HorizontalAlignment', 'center');
-
 saveas(fig2a, fullfile(fig_dir, 'pi_punto2a_region_s.png'));
+close(fig2a);
 
 %% Punto 2.b: Centro de las asíntotas sigma_a en función de z
 z_max_asintota = 312.766 - 80;
@@ -191,17 +198,67 @@ fprintf('Ángulos de asíntotas: phi = +-90° (estrictamente verticales)\n');
 fprintf('Centro de asíntotas: sigma_a(z) = (z - 312.77) / 2\n');
 fprintf('Para que sigma_a quede a la izquierda de -40 rad/s: z < %.2f rad/s\n', z_max_asintota);
 
-%% Punto 2.c: Lugar de las Raíces para ajuste de kp con PI (z = 120 rad/s)
+%% Punto 2.c: Elección de z y Lugar de las Raíces para ajuste de kp con PI
+z_lento = 50;
+L_lento = ((s + z_lento) / s) * G;
 z_pi = 120;
 L_unit = ((s + z_pi) / s) * G;
 
-figure('Name', 'Parte 2 - Punto 2.c: Lugar de las Raíces - Controlador PI (z = 120 rad/s)');
-rlocus(L_unit);
+% Gráfico comparativo z=50 vs z=120
+fig_comp_z = figure('Name', 'Comparación de ubicación del cero z', 'Position', [100, 100, 950, 420], 'Visible', 'off');
+subplot(1, 2, 1);
+rlocus(L_lento);
+hold on;
 sgrid(0.69, []);
+xline(-sigma_min, 'k--', 'LineWidth', 1.2);
+xlim([-250, 10]);
+ylim([-150, 150]);
+title('Caso z = 50 rad/s < 100 rad/s');
+xlabel('Eje Real (1/s)');
+ylabel('Eje Imaginario (rad/s)');
+grid on;
+T_lento_test = feedback(0.84 * L_lento, 1);
+p_lento_test = pole(T_lento_test);
+plot(real(p_lento_test), imag(p_lento_test), 'rs', 'MarkerFaceColor', 'r', 'MarkerSize', 6);
+text(-48, 25, 'Polo lento en [-z, 0]', 'Color', 'r', 'FontSize', 9, 'FontWeight', 'bold');
+
+subplot(1, 2, 2);
+rlocus(L_unit);
+hold on;
+sgrid(0.69, []);
+xline(-sigma_min, 'k--', 'LineWidth', 1.2);
+xlim([-250, 10]);
+ylim([-150, 150]);
+title('Caso seleccionado: z = 120 rad/s > 100 rad/s');
+xlabel('Eje Real (1/s)');
+ylabel('Eje Imaginario (rad/s)');
+grid on;
+T_120_test = feedback(0.84 * L_unit, 1);
+p_120_test = pole(T_120_test);
+plot(real(p_120_test), imag(p_120_test), 'ro', 'MarkerFaceColor', 'r', 'MarkerSize', 6);
+text(-120, 100, 'Par complejo dominante', 'Color', 'r', 'FontSize', 9, 'FontWeight', 'bold');
+
+sgtitle('Influencia de la posición del cero z en el Lugar de las Raíces');
+saveas(fig_comp_z, fullfile(fig_dir, 'pi_punto2_comparacion_z.png'));
+close(fig_comp_z);
+
+% LGR detallado con z = 120 rad/s
+fig_lgr = figure('Name', 'Parte 2 - Punto 2.c: Lugar de las Raíces - Controlador PI (z = 120 rad/s)', 'Position', [100, 100, 720, 480], 'Visible', 'off');
+rlocus(L_unit);
+hold on;
+sgrid(0.69, []);
+xline(-sigma_min, 'r--', 'LineWidth', 1.5, 'DisplayName', '\xi\omega_n \geq 40');
+sigma_a = (z_pi - 312.766) / 2;
+xline(sigma_a, 'm:', 'LineWidth', 1.5, 'DisplayName', sprintf('\\sigma_a = %.1f', sigma_a));
+xlim([-250, 20]);
+ylim([-160, 160]);
 title(sprintf('Lugar de las Raíces con controlador PI (z = %d rad/s)', z_pi));
 xlabel('Eje Real (1/s)');
 ylabel('Eje Imaginario (rad/s)');
 grid on;
+legend('Location', 'northwest');
+saveas(fig_lgr, fullfile(fig_dir, 'pi_punto2_lgr.png'));
+close(fig_lgr);
 
 % Selección de ganancia sobre la cota xi = 0.69 (análogo al Punto 1)
 kp_ini = 0.84;
@@ -228,7 +285,7 @@ xi_dom = xi_ini(idx_c(1));
 T_proto = tf(wn_dom^2, [1, 2*xi_dom*wn_dom, wn_dom^2]);
 info_proto = stepinfo(T_proto);
 
-% Ajuste de ganancia para compensar el cero (mayor amortiguamiento, ej: xi ~ 0.75):
+% Ajuste de ganancia para compensar el cero (mayor amortiguamiento):
 kp_aj = 0.73;
 ki_aj = kp_aj * z_pi; % 87.6
 T_aj = feedback(kp_aj * L_unit, 1);
@@ -248,14 +305,14 @@ fprintf('Tiempo de estab. ajustado (Ts): %.4f s (%.2f ms)  (CUMPLE <= 0.10 s)\n'
 fprintf('Error estacionario (ess):       %.4f  (CUMPLE = 0)\n', ess_aj);
 
 % Gráfico: Comparación temporal del Efecto del Cero
-fig_cero = figure('Name', 'Parte 2 - Punto 2.d: Efecto del Cero de Lazo Cerrado');
+fig_cero = figure('Name', 'Parte 2 - Punto 2.d: Efecto del Cero de Lazo Cerrado', 'Position', [100, 100, 720, 440], 'Visible', 'off');
 t_cero = linspace(0, 0.10, 2000);
 [y_proto, t_p] = step(T_proto, t_cero);
 [y_ini_c, ~]   = step(T_ini, t_cero);
 [y_aj_c, ~]    = step(T_aj, t_cero);
 
 plot(t_p*1e3, y_proto, 'k--', 'LineWidth', 1.5, ...
-    'DisplayName', sprintf('Prototipo 2^{do} orden sin cero (\\xi = 0.69, PO = %.2f %%)', info_proto.Overshoot));
+    'DisplayName', sprintf('Prototipo 2^{do} orden sin cero (\xi = 0.69, PO = %.2f %%)', info_proto.Overshoot));
 hold on;
 plot(t_p*1e3, y_ini_c, 'r-', 'LineWidth', 1.8, ...
     'DisplayName', sprintf('Sistema PI k_p = %.2f (con cero z = %d, PO = %.2f %%)', kp_ini, z_pi, info_ini.Overshoot));
@@ -269,6 +326,7 @@ xlabel('Tiempo (ms)');
 ylabel('Tensión de salida y(t) [V]');
 legend('Location', 'southeast');
 saveas(fig_cero, fullfile(fig_dir, 'pi_punto2_efecto_cero.png'));
+close(fig_cero);
 
 %% Punto 3: Implementación analógica con Op-Amps y dimensionamiento E24
 CPI_com   = 0.1e-6;   % 0.1 uF
@@ -291,7 +349,151 @@ fprintf('\n=== PARTE 2 - PUNTO 3: COMPONENTES COMERCIALES E24 ===\n');
 fprintf('RPI1 = %d kOhm, RPI2 = %d kOhm, CPI = %.1f uF\n', RPI1_com/1e3, RPI2_com/1e3, CPI_com*1e6);
 fprintf('RINV1 = %d kOhm, RINV2 = %d kOhm (Ganancia -1)\n', RINV1_com/1e3, RINV2_com/1e3);
 fprintf('Valores efectivos: kp = %.4f, ki = %.2f rad/s, z = %.2f rad/s\n', kp_com, ki_com, z_com);
+fprintf('Sobrepaso efectivo (PO):        %.2f %%  (<= 5 %%)\n', info_com.Overshoot);
+fprintf('Tiempo de estab. efectivo (Ts): %.4f s (%.2f ms)  (<= 0.10 s)\n', info_com.SettlingTime, info_com.SettlingTime*1e3);
+fprintf('Error estacionario (ess):       %.4f  (= 0)\n', ess_com);
+
+% Gráfico: Respuesta al escalón E24 vs Continuo
+fig_step = figure('Name', 'Punto 3: Respuesta al escalón E24', 'Position', [100, 100, 720, 440], 'Visible', 'off');
+t_sim_step = linspace(0, 0.12, 3000);
+[y_aj, ~]  = step(T_aj, t_sim_step);
+[y_c, t_out] = step(T_com, t_sim_step);
+
+plot(t_out*1e3, y_aj, 'b--', 'LineWidth', 1.6, ...
+    'DisplayName', sprintf('Continuo k_p = 0.68 (PO = %.2f %%, T_s = %.1f ms)', info_aj.Overshoot, info_aj.SettlingTime*1e3));
+hold on;
+plot(t_out*1e3, y_c, 'k-', 'LineWidth', 2.0, ...
+    'DisplayName', sprintf('E24: R_{PI1}=120k, R_{PI2}=82k (PO = %.2f %%, T_s = %.1f ms)', info_com.Overshoot, info_com.SettlingTime*1e3));
+yline(1.0, 'k:');
+yline(1.02, 'g:', 'LineWidth', 1.0, 'DisplayName', 'Banda \\pm 2%%');
+yline(0.98, 'g:', 'LineWidth', 1.0, 'HandleVisibility', 'off');
+xline(info_com.SettlingTime*1e3, 'r:', 'LineWidth', 1.2, ...
+    'DisplayName', sprintf('T_s = %.1f ms', info_com.SettlingTime*1e3));
+grid on;
+title('Respuesta al escalón: Controlador continuo vs Implementación E24');
+xlabel('Tiempo (ms)');
+ylabel('Tensión de salida y(t) [V]');
+legend('Location', 'southeast');
+saveas(fig_step, fullfile(fig_dir, 'pi_punto3_escalon_e24.png'));
+close(fig_step);
+
+%% Punto 4: Simulación circuital en Simscape con TL081 (Fig. 5)
+mdl_pi = 'TP_Lab2_PI_TL081';
+if exist([mdl_pi '.slx'], 'file') || exist(fullfile(script_dir, [mdl_pi '.slx']), 'file')
+    load_system(fullfile(script_dir, [mdl_pi '.slx']));
+    set_param(mdl_pi, 'StopTime', '0.12');
+    set_param(mdl_pi, 'SimscapeLogLimitData', 'off');
+    set_param(mdl_pi, 'LimitDataPoints', 'off');
+    
+    out_sim_pi = sim(mdl_pi);
+    t_sim_pi   = out_sim_pi.simlog.Voltage_Sensor.V.series.time;
+    y_sim_pi   = out_sim_pi.simlog.Voltage_Sensor.V.series.values;
+    vo1_sim    = out_sim_pi.simlog.Sensor_Vo1.V.series.values;
+    vpi_sim    = out_sim_pi.simlog.Sensor_Vpi.V.series.values;
+
+    t_unif_pi = linspace(0, max(t_sim_pi), 5000)';
+    y_ft_pi   = step(T_com, t_unif_pi);
+
+    [t_sim_pi_u, idx_pi_u] = unique(t_sim_pi);
+    y_sim_pi_interp        = interp1(t_sim_pi_u, y_sim_pi(idx_pi_u), t_unif_pi, 'pchip');
+    err_max_pi             = max(abs(y_sim_pi_interp - y_ft_pi));
+
+    y_inf_sim_pi = y_sim_pi(end);
+    ess_sim_pi   = 1 - y_inf_sim_pi;
+    info_sim_pi  = stepinfo(y_sim_pi, t_sim_pi, y_inf_sim_pi);
+
+    fprintf('\n=== PARTE 2 - PUNTO 4.a: SIMULACIÓN EN SIMSCAPE CON TL081 (FIG. 5) ===\n');
+    fprintf('Error máximo |y(Simscape) - y(FT)|: %.4e V (%.3f mV)\n', err_max_pi, err_max_pi*1e3);
+    fprintf('Sobrepaso Simscape (PO):            %.2f %%  (FT: %.2f %%)\n', info_sim_pi.Overshoot, info_com.Overshoot);
+    fprintf('Tiempo de estab. Simscape (Ts):     %.4f s (%.2f ms)  (FT: %.2f ms)\n', info_sim_pi.SettlingTime, info_sim_pi.SettlingTime*1e3, info_com.SettlingTime*1e3);
+    fprintf('Tiempo de pico Simscape (Tp):       %.4f s (%.2f ms)  (FT: %.2f ms)\n', info_sim_pi.PeakTime, info_sim_pi.PeakTime*1e3, info_com.PeakTime*1e3);
+    fprintf('Valor final Simscape:               %.4f V  (FT: %.4f V)\n', y_inf_sim_pi, y_inf_com);
+    fprintf('Error estacionario Simscape (ess):  %.4f (%.2f %%)  (FT: %.2f %%)\n', ess_sim_pi, ess_sim_pi*100, ess_com*100);
+
+    fig4a = figure('Name', 'Parte 2 - Punto 4.a: Superposición FT vs Simscape TL081 (PI)', 'Position', [100, 100, 720, 420], 'Visible', 'off');
+    plot(t_unif_pi * 1e3, y_ft_pi, 'b-', 'LineWidth', 2.0, 'DisplayName', 'Modelo Lineal FT (T_{com})');
+    hold on;
+    plot(t_sim_pi * 1e3, y_sim_pi, 'r--', 'LineWidth', 1.4, 'DisplayName', 'Circuito Simscape (TL081)');
+    yline(1.0, 'k:');
+    yline(1.02, 'g:', 'LineWidth', 0.8, 'DisplayName', 'Banda \\pm 2%%');
+    yline(0.98, 'g:', 'LineWidth', 0.8, 'HandleVisibility', 'off');
+    grid on;
+    title('Respuesta al escalón unitario: Modelo por FT vs. Simscape (Controlador PI, TL081)');
+    xlabel('Tiempo (ms)');
+    ylabel('Tensión de salida y(t) [V]');
+    legend('Location', 'southeast');
+    saveas(fig4a, fullfile(fig_dir, 'pi_punto4a_simscape_vs_ft.png'));
+    close(fig4a);
+
+    % 4.b: Gráfico de tensiones internas y(t), vo1(t) y vPI(t)
+    fig4b = figure('Name', 'Parte 2 - Punto 4.b: Tensiones Internas Simscape (PI)', 'Position', [100, 100, 750, 520], 'Visible', 'off');
+    subplot(2, 1, 1);
+    plot(t_sim_pi * 1e3, y_sim_pi, 'b-', 'LineWidth', 1.6);
+    grid on;
+    title('Tensión de salida del sistema y(t)');
+    xlabel('Tiempo (ms)');
+    ylabel('y(t) [V]');
+    yline(1.0, 'k:');
+
+    subplot(2, 1, 2);
+    plot(t_sim_pi * 1e3, vo1_sim, 'm--', 'LineWidth', 1.4, 'DisplayName', 'v_{o1}(t) (Salida etapa PI inversora)');
+    hold on;
+    plot(t_sim_pi * 1e3, vpi_sim, 'r-', 'LineWidth', 1.5, 'DisplayName', 'v_{PI}(t) (Salida inversor unitario)');
+    grid on;
+    title('Tensiones en el controlador PI');
+    xlabel('Tiempo (ms)');
+    ylabel('Tensión [V]');
+    legend('Location', 'southeast');
+
+    saveas(fig4b, fullfile(fig_dir, 'pi_punto4b_tensiones_internas.png'));
+    close(fig4b);
+
+    close_system(mdl_pi, 0);
+else
+    fprintf('\n[Aviso] No se encontró el modelo %s.slx en el directorio.\n', mdl_pi);
+end
+
+%% =========================================================================
+%% PUNTO 5: COMPARACIÓN FINAL (CONTROL P vs CONTROL PI EN SIMSCAPE)
+%% =========================================================================
+if exist('y_sim_p', 'var') && exist('y_sim_pi', 'var')
+    fig5 = figure('Name', 'Punto 5: Comparación Simscape Control P vs PI', 'Position', [100, 100, 750, 440], 'Visible', 'off');
+    plot(t_sim_p * 1e3, y_sim_p, 'r--', 'LineWidth', 1.6, ...
+        'DisplayName', sprintf('Control P: k_p=1.41 (PO=%.1f%%, T_s=%.1f ms, e_{ss}=%.1f%%)', ...
+        info_sim_p.Overshoot, info_sim_p.SettlingTime*1e3, ess_sim_p*100));
+    hold on;
+    plot(t_sim_pi * 1e3, y_sim_pi, 'b-', 'LineWidth', 1.8, ...
+        'DisplayName', sprintf('Control PI: k_p=0.68, k_i=83.3 (PO=%.1f%%, T_s=%.1f ms, e_{ss}=%.1f%%)', ...
+        info_sim_pi.Overshoot, info_sim_pi.SettlingTime*1e3, ess_sim_pi*100));
+
+    yline(1.0, 'k:', 'LineWidth', 1.0, 'DisplayName', 'Referencia r(t) = 1.0 V');
+    yline(1.02, 'g:', 'LineWidth', 0.8, 'DisplayName', 'Banda \pm 2% (PI)');
+    yline(0.98, 'g:', 'LineWidth', 0.8, 'HandleVisibility', 'off');
+
+    grid on;
+    xlim([0, 120]);
+    ylim([0, 1.15]);
+    title('Comparación de la respuesta al escalón: Control P vs. Control PI (Simscape con TL081)');
+    xlabel('Tiempo (ms)');
+    ylabel('Tensión de salida y(t) [V]');
+    legend('Location', 'southeast', 'FontSize', 9);
+
+    saveas(fig5, fullfile(fig_dir, 'punto5_comparacion_p_vs_pi.png'));
+    close(fig5);
+
+    fprintf('\n=========================================================================\n');
+    fprintf('=== TABLA COMPARATIVA DE DESEMPEÑO: CONTROL P vs CONTROL PI (SIMSCAPE) ===\n');
+    fprintf('=========================================================================\n');
+    fprintf('%-25s | %-18s | %-18s\n', 'Parámetro', 'Control P (TL081)', 'Control PI (TL081)');
+    fprintf('-------------------------------------------------------------------------\n');
+    fprintf('%-25s | %15.2f %% | %15.2f %%\n', 'Sobrepaso (PO)', info_sim_p.Overshoot, info_sim_pi.Overshoot);
+    fprintf('%-25s | %15.2f ms | %15.2f ms\n', 'Tiempo de estab. (Ts 2%)', info_sim_p.SettlingTime*1e3, info_sim_pi.SettlingTime*1e3);
+    fprintf('%-25s | %15.2f ms | %15.2f ms\n', 'Tiempo de pico (Tp)', info_sim_p.PeakTime*1e3, info_sim_pi.PeakTime*1e3);
+    fprintf('%-25s | %16.4f V | %16.4f V\n', 'Valor final y(inf)', y_sim_p(end), y_sim_pi(end));
+    fprintf('%-25s | %15.2f %% | %15.2f %%\n', 'Error estacionario (ess)', ess_sim_p*100, ess_sim_pi*100);
+    fprintf('=========================================================================\n');
+end
 
 disp('=========================================================================');
-disp('=== EJECUCIÓN COMPLETA FINALIZADA EXITOSAMENTE ===');
+disp('=== EJECUCIÓN COMPLETA DEL TP2 FINALIZADA EXITOSAMENTE ===');
 disp('=========================================================================');

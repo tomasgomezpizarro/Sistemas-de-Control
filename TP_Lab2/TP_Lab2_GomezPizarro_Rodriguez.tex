@@ -424,6 +424,58 @@ Los valores efectivos del controlador con los componentes comerciales adoptados 
 \end{equation}
 
 
-Todos los cálculos y figuras de este trabajo práctico se generan ejecutando el script \texttt{TP\_Lab2.m}.
+\subsection*{Punto 4. Simulación circuital del lazo cerrado con PI en Simscape}
+
+\subsubsection*{4.a. Implementación del circuito de la Fig. 5 y superposición con la FT}
+
+Se implementa el circuito completo de la Fig. 5 en Simscape (\texttt{TP\_Lab2\_PI\_TL081.slx}, Fig. \ref{fig:esquema_pi_simscape}) tomando como base el modelo del lazo cerrado de la Primera Parte. El controlador analógico se incorpora conectando la salida del restador $U_{1A}$ (señal de error) a la etapa inversora PI de la Fig. 3 ($U_4$ con $R_{PI1} = 120\text{ k}\Omega$, $R_{PI2} = 82\text{ k}\Omega$ y $C_{PI} = 0{,}1\,\mu\text{F}$), seguida de la etapa inversora de ganancia unitaria de la Fig. 4 ($U_5$ con $R_{INV1} = R_{INV2} = 10\text{ k}\Omega$). La salida $V_{PI}$ se conecta a la entrada de la planta ($R_1 = 100\text{ k}\Omega$), en la cual el operacional $U_{2A}$ se reconfigura como seguidor de tensión con $R_{10} = 1\text{ k}\Omega$.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.98\textwidth]{figuras/esquema_pi_simscape.png}
+    \caption{Esquema circuital completo en Simscape del lazo cerrado con controlador PI (\texttt{TP\_Lab2\_PI\_TL081.slx}).}
+    \label{fig:esquema_pi_simscape}
+\end{figure}
+
+Todos los amplificadores operacionales ($U_{1A}, U_{3A}, U_{2A}, U_4, U_5$) se modelan con el bloque \textit{Band-Limited Op-Amp} utilizando los parámetros del TL081 (Tabla A0 del Anexo). La simulación se ejecuta con el solver \texttt{ode23t} y paso máximo de $10\ \mu\text{s}$ ante un escalón unitario de entrada.
+
+En la Fig. \ref{fig:pi_punto4a_simscape} se superponen la respuesta temporal simulada en Simscape y la del modelo por función de transferencia $T(s)$ con los valores comerciales E24.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\textwidth]{figuras/pi_punto4a_simscape_vs_ft.png}
+    \caption{Superposición de la respuesta al escalón: Modelo por FT vs. Simscape con op-amps reales TL081 para el control PI ($k_p = 0{,}6833$, $k_i = 83{,}33\text{ rad/s}$).}
+    \label{fig:pi_punto4a_simscape}
+\end{figure}
+
+Al cuantificar la diferencia punto a punto mediante interpolación numérica, el error máximo obtenido es:
+\begin{equation}
+    \max_t |y_{\text{Simscape}}(t) - y_{\text{FT}}(t)| = 3{,}18 \cdot 10^{-5}\text{ V} \approx 0{,}032\text{ mV}
+\end{equation}
+lo que ratifica una concordancia prácticamente exacta entre la simulación circuital con operacionales reales y el modelo lineal.
+
+En el Cuadro \ref{tab:pi_punto4a_comparacion} se resumen las métricas de desempeño evaluadas sobre los datos simulados mediante \texttt{stepinfo}.
+
+\begin{table}[H]
+    \centering
+    \caption{Comparación entre el modelo por función de transferencia y la simulación en Simscape con operacionales reales TL081 para el lazo con control PI.}
+    \vspace{2mm}
+    \begin{tabular}{lcccc}
+        \toprule
+        \textbf{Métrica} & \textbf{Requerido} & \textbf{Modelo FT} & \textbf{Simscape (TL081)} & \textbf{Cumple} \\
+        \midrule
+        Sobrepaso ($PO$) & $\le 5\%$ & $4{,}63\%$ & $4{,}62\%$ & Sí \\
+        Tiempo de estab. ($T_s$) & $\le 0{,}10\text{ s}$ & $55{,}70\text{ ms}$ & $55{,}69\text{ ms}$ & Sí \\
+        Tiempo de pico ($T_p$) & -- & $34{,}38\text{ ms}$ & $34{,}43\text{ ms}$ & -- \\
+        Valor final ($y_\infty$) & $1{,}00\text{ V}$ & $1{,}0000\text{ V}$ & $1{,}0000\text{ V}$ & -- \\
+        Error estacionario ($e_{ss}$) & $0$ & $0{,}00\%$ & $0{,}00\%$ & Sí \\
+        \bottomrule
+    \end{tabular}
+    \label{tab:pi_punto4a_comparacion}
+\end{table}
+
+A diferencia del control proporcional puro analizado en la Primera Parte, el controlador PI logra satisfacer simultáneamente las tres especificaciones de diseño: sobrepaso acotado ($PO \le 5\%$), rapidez adecuada ($T_s \le 0{,}10\text{ s}$) y eliminación completa del error en régimen permanente ($e_{ss} = 0$).
+
+Todos los cálculos y figuras de este trabajo práctico se generan ejecutando los scripts \texttt{TP\_Lab2.m} y \texttt{TP\_Lab2\_PI.m}.
 
 \end{document}
