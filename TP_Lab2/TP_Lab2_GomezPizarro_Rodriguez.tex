@@ -139,19 +139,19 @@ Se recalculan las medidas de desempeño mediante \texttt{stepinfo} y se comparan
     \vspace{2mm}
     \begin{tabular}{lcccc}
         \toprule
-        \textbf{Métrica} & \textbf{Requerido} & \textbf{Teórico ($k_p = 1{,}41$)} & \textbf{E24 ($k_p = 1{,}41$)} & \textbf{Cumple} \\
+        \textbf{Métrica} & \textbf{Requerido} & \textbf{Teórico ($k_p = 1{,}4100$)} & \textbf{E24 ($k_p = 1{,}4103$)} & \textbf{Cumple} \\
         \midrule
-        Sobrepaso ($PO$) & $\le 5\%$ & $4{,}98\%$ & $4{,}98\%$ & Sí \\
-        Tiempo de estab. ($T_s$) & $\le 0{,}10\text{ s}$ & $26{,}5\text{ ms}$ & $26{,}5\text{ ms}$ & Sí \\
-        Tiempo de pico ($T_p$) & -- & $19{,}1\text{ ms}$ & $19{,}1\text{ ms}$ & -- \\
-        Valor final ($y_\infty$) & $1{,}00\text{ V}$ & $0{,}585\text{ V}$ & $0{,}585\text{ V}$ & -- \\
-        Error estac. ($e_{ss}$) & $0$ & $41{,}5\%$ & $41{,}5\%$ & No \\
+        Sobrepaso ($PO$) & $\le 5\%$ & $4{,}979\%$ & $4{,}981\%$ & Sí \\
+        Tiempo de estab. ($T_s$) & $\le 0{,}10\text{ s}$ & $26{,}47\text{ ms}$ & $26{,}47\text{ ms}$ & Sí \\
+        Tiempo de pico ($T_p$) & -- & $19{,}14\text{ ms}$ & $19{,}14\text{ ms}$ & -- \\
+        Valor final ($y_\infty$) & $1{,}00\text{ V}$ & $0{,}5851\text{ V}$ & $0{,}5851\text{ V}$ & -- \\
+        Error estac. ($e_{ss}$) & $0$ & $41{,}494\%$ & $41{,}489\%$ & No \\
         \bottomrule
     \end{tabular}
     \label{tab:punto3_metricas}
 \end{table}
 
-Se comprueba que el sobrepaso resultante es $PO = 4{,}98\% \le 5\%$, por lo que la especificación de sobrepaso \textbf{se sigue cumpliendo} estrictamente con los valores comerciales de la serie E24.
+Se comprueba que la ligera elevación de ganancia comercial ($k_p = 1{,}4103$ frente a $1{,}4100$) eleva el sobrepaso en apenas un $0{,}002\%$ ($PO = 4{,}981\%$). Dado que $4{,}981\% \le 5{,}000\%$, la especificación de sobrepaso \textbf{se sigue cumpliendo} estrictamente con los valores comerciales de la serie E24.
 
 
 \subsection*{Punto 4. Simulación circuital del lazo cerrado en Simscape}
@@ -183,8 +183,8 @@ En el Cuadro \ref{tab:punto4_comparacion} se resumen las medidas de desempeño c
         \toprule
         \textbf{Métrica} & \textbf{Requerido} & \textbf{Modelo FT} & \textbf{Simscape (TL081)} & \textbf{Cumple} \\
         \midrule
-        Sobrepaso ($PO$) & $\le 5\%$ & $4{,}98\%$ & $4{,}98\%$ & Sí \\
-        Tiempo de estab. ($T_s$) & $\le 0{,}10\text{ s}$ & $26{,}5\text{ ms}$ & $26{,}5\text{ ms}$ & Sí \\
+        Sobrepaso ($PO$) & $\le 5\%$ & $4{,}979\%$ & $4{,}981\%$ & Sí \\
+        Tiempo de estab. ($T_s$) & $\le 0{,}10\text{ s}$ & $26{,}47\text{ ms}$ & $26{,}47\text{ ms}$ & Sí \\
         Tiempo de pico ($T_p$) & -- & $19{,}1\text{ ms}$ & $19{,}2\text{ ms}$ & -- \\
         Valor final ($y_\infty$) & $1{,}00\text{ V}$ & $0{,}5851\text{ V}$ & $0{,}5851\text{ V}$ & -- \\
         Error estacionario ($e_{ss}$) & $0$ & $41{,}49\%$ & $41{,}49\%$ & No \\
