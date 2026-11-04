@@ -2,6 +2,16 @@
 % TP de Laboratorio 2: Desarrollo de Controladores (P y PI)
 clear; clc; close all;
 
+%% Rutas
+script_dir = fileparts(mfilename('fullpath'));
+if isempty(script_dir)
+    script_dir = pwd;
+end
+fig_dir = fullfile(script_dir, 'figuras');
+if ~exist(fig_dir, 'dir')
+    mkdir(fig_dir);
+end
+
 %% =========================================================================
 %% PRIMERA PARTE: CONTROL PROPORCIONAL
 %% =========================================================================
@@ -30,3 +40,27 @@ title('Lugar de las Raíces de G(s)');
 xlabel('Eje Real (1/s)');
 ylabel('Eje Imaginario (rad/s)');
 grid on;
+
+%% Punto 2: Verificación de la respuesta al escalón en lazo cerrado
+kp = 1.4;
+T = feedback(kp * G, 1);
+
+info  = stepinfo(T);
+y_inf = dcgain(T);
+ess   = 1 - y_inf;
+
+fprintf('\n=== PUNTO 2: MÉTRICAS DE LA RESPUESTA AL ESCALÓN (kp = %.2f) ===\n', kp);
+fprintf('Sobrepaso (PO):                 %.2f %%  (Especificación: <= 5 %%)\n', info.Overshoot);
+fprintf('Tiempo de establecimiento (Ts): %.4f s (%.2f ms)  (Especificación: <= 0.10 s)\n', info.SettlingTime, info.SettlingTime*1e3);
+fprintf('Tiempo de pico (Tp):            %.4f s (%.2f ms)\n', info.PeakTime, info.PeakTime*1e3);
+fprintf('Valor en estado estacionario:   %.4f V\n', y_inf);
+fprintf('Error estacionario (ess):       %.4f (%.2f %%)  (Especificación: = 0)\n', ess, ess*100);
+
+% Gráfico de la respuesta al escalón
+fig2 = figure('Name', 'Punto 2: Respuesta al escalón (kp = 1.4)');
+step(T);
+grid on;
+title(sprintf('Respuesta al escalón en lazo cerrado (k_p = %.2f)', kp));
+xlabel('Tiempo (s)');
+ylabel('Amplitud (V)');
+saveas(fig2, fullfile(fig_dir, 'punto2_escalon.png'));

@@ -86,4 +86,26 @@ con polos en lazo cerrado en $s_{1,2} \approx -156 \pm j 163\text{ rad/s}$, $\xi
     \label{fig:punto1_lgr}
 \end{figure}
 
+\subsection*{Punto 2. Verificación mediante la respuesta al escalón}
+
+Se obtiene la función de transferencia a lazo cerrado para $k_p = 1{,}40$:
+\begin{equation}
+    T(s) = \frac{k_p G(s)}{1 + k_p G(s)} = \frac{29787}{s^2 + 312{,}8\,s + 51064}
+\end{equation}
+
+A partir de la respuesta al escalón unitario evaluada en MATLAB (Fig. \ref{fig:punto2_escalon}) y mediante el comando \texttt{stepinfo}, se extraen las métricas de desempeño:
+\begin{itemize}
+    \item \textbf{Sobrepaso:} $PO = 4{,}92\% \le 5\%$ \quad $\rightarrow$ \textbf{Cumple}.
+    \item \textbf{Tiempo de establecimiento:} $T_s = 26{,}5\text{ ms} \le 100\text{ ms}$ \quad $\rightarrow$ \textbf{Cumple}.
+    \item \textbf{Error en régimen permanente:} $e_{ss} = 1 - y(\infty) = 1 - 0{,}583 = 0{,}417$ ($41{,}7\% \ne 0$) \quad $\rightarrow$ \textbf{No cumple}.
+\end{itemize}
+Se corrobora que el sistema cumple las especificaciones dinámicas ($PO$ y $T_s$), pero no puede anular el error estacionario debido a la ausencia de acción integral.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{figuras/punto2_escalon.png}
+    \caption{Respuesta al escalón unitario en lazo cerrado con $k_p = 1{,}40$.}
+    \label{fig:punto2_escalon}
+\end{figure}
+
 \end{document}
