@@ -33,8 +33,8 @@
 
 Las especificaciones requeridas para el sistema en lazo cerrado son:
 \begin{itemize}
-    \item $PO \le 5\,\%$
-    \item $T_s \le 0{,}10\text{ s}$ (criterio del $2\,\%$)
+    \item $PO \le 5\%$
+    \item $T_s \le 0{,}10\text{ s}$ (criterio del $2\%$)
     \item $e_{ss} = 0$ ante escalón unitario
 \end{itemize}
 
@@ -73,7 +73,7 @@ Por ende, la condición de $T_s \le 0{,}10\text{ s}$ se satisface para cualquier
 
 Para satisfacer la restricción de sobrepaso se impone:
 \begin{equation}
-    PO \le 5\,\% \implies \xi \ge \frac{-\ln(0{,}05)}{\sqrt{\pi^2 + \ln^2(0{,}05)}} \approx 0{,}69
+    PO \le 5\% \implies \xi \ge \frac{-\ln(0{,}05)}{\sqrt{\pi^2 + \ln^2(0{,}05)}} \approx 0{,}69
 \end{equation}
 
 Para reducir al mínimo el error estacionario $e_{ss}$, conviene elegir el mayor valor de ganancia posible dentro del margen permitido, es decir, $\xi = 0{,}69$:
@@ -85,7 +85,7 @@ Igualando con el término independiente:
     21276{,}6\,(1 + k_p) = 51365 \implies k_p \approx 1{,}41
 \end{equation}
 
-Con $k_p = 1{,}41$ se cumplen $PO \le 5\,\%$ y $T_s \le 0{,}10\text{ s}$, quedando como única especificación no satisfecha $e_{ss} = 0$, con un valor residual de $e_{ss} = 1/(1 + 1{,}41) \approx 0{,}415$ ($41{,}5\,\%$).
+Con $k_p = 1{,}41$ se cumplen $PO \le 5\%$ y $T_s \le 0{,}10\text{ s}$, quedando como única especificación no satisfecha $e_{ss} = 0$, con un valor residual de $e_{ss} = 1/(1 + 1{,}41) \approx 0{,}415$ ($41{,}5\%$).
 
 \begin{figure}[H]
     \centering
