@@ -120,8 +120,19 @@ Físicamente, esto indica que existe un límite superior para la ganancia integr
     Los polos dominantes deben quedar a la izquierda de la recta vertical $\text{Re}(s) = -40\text{ rad/s}$.
 \end{itemize}
 
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.65\textwidth]{figuras/pi_punto2a_region_s.png}
+    \caption{Región admisible para los polos dominantes en el plano $s$ delimitada por $PO \le 5\%$ (cono $\xi \ge 0{,}69$) y $T_s \le 0{,}10\text{ s}$ (semiplano $\xi\omega_n \ge 40\text{ rad/s}$).}
+    \label{fig:pi_region_s}
+\end{figure}
+
 \subsubsection*{2.b. Centro de las asíntotas $\sigma_a$ en función de $z$}
-La función de lazo abierto $L(s) = k_p \frac{s + z}{s(\tau_1 s + 1)(\tau_2 s + 1)}$ posee $n = 3$ polos ($0, -100, -212{,}77$) y $m = 1$ cero en $-z$. La diferencia es $n - m = 2$, por lo que existen dos asíntotas a $\pm 90^\circ$ que parten del eje real en:
+La función de lazo abierto $L(s) = k_p \frac{s + z}{s(\tau_1 s + 1)(\tau_2 s + 1)}$ posee $n = 3$ polos ($0, -100, -212{,}77\text{ rad/s}$) y $m = 1$ cero en $-z$. Al haber un exceso de dos polos sobre ceros ($n - m = 2$), existen dos ramas que tienden al infinito a lo largo de asíntotas cuyos ángulos están dados por:
+\begin{equation}
+    \phi_k = \frac{(2k + 1) \cdot 180^\circ}{n - m} = \frac{(2k + 1) \cdot 180^\circ}{2} \implies \phi_0 = 90^\circ, \quad \phi_1 = 270^\circ \equiv -90^\circ
+\end{equation}
+Dado que los ángulos son exactamente $\pm 90^\circ$, las asíntotas son \textbf{estrictamente verticales} (perpendiculares al eje real). Su punto de partida sobre el eje real es el centro de asíntotas:
 \begin{equation}
     \sigma_a = \frac{\sum \text{polos} - \sum \text{ceros}}{n - m} = \frac{(0 - 100 - 212{,}77) - (-z)}{2} = \frac{z - 312{,}77}{2}
 \end{equation}

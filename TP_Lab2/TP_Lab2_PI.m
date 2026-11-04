@@ -66,22 +66,60 @@ PO_max = 5;
 xi_min = -log(PO_max / 100) / sqrt(pi^2 + (log(PO_max / 100))^2);
 Ts_max = 0.10;
 sigma_min = 4 / Ts_max; % 40 rad/s
+theta_rad = acos(xi_min);
 
 fprintf('\n=== PUNTO 2.a: REQUISITOS EN EL PLANO s ===\n');
-fprintf('xi mínimo para PO <= 5%%:          %.4f (~0.69)\n', xi_min);
-fprintf('sigma mínimo (xi*wn) para Ts<=0.1s: %.2f rad/s\n', sigma_min);
+fprintf('xi minimo para PO <= 5%%:          %.4f (~0.69)\n', xi_min);
+fprintf('sigma minimo (xi*wn) para Ts<=0.1s: %.2f rad/s\n', sigma_min);
 
-%% 2.b: Centro de las asíntotas sigma_a en función de z
+% Grafico de la region de polos dominantes en el plano s
+fig2a = figure('Name', 'Punto 2.a: Region admisible en el plano s', 'Position', [100, 100, 680, 480], 'Visible', 'off');
+hold on;
+sig_grid = linspace(-180, -sigma_min, 200);
+w_top = -sig_grid * tan(theta_rad);
+w_bot =  sig_grid * tan(theta_rad);
+fill([sig_grid, fliplr(sig_grid)], [w_bot, fliplr(w_top)], [0.85 0.95 0.85], ...
+    'EdgeColor', 'none', 'DisplayName', 'Region admisible');
+r_line = linspace(0, 220, 100);
+plot(-r_line*cos(theta_rad),  r_line*sin(theta_rad), 'b-', 'LineWidth', 1.8, ...
+    'DisplayName', sprintf('Limite PO \\le 5%%%% (\\xi = %.2f, \\theta = %.1f°)', xi_min, rad2deg(theta_rad)));
+plot(-r_line*cos(theta_rad), -r_line*sin(theta_rad), 'b-', 'LineWidth', 1.8, 'HandleVisibility', 'off');
+xline(-sigma_min, 'r--', 'LineWidth', 1.8, ...
+    'DisplayName', sprintf('Limite Ts \\le 0.10 s (\\xi\\omega_n \\ge %d rad/s)', sigma_min));
+yline(0, 'k-', 'LineWidth', 0.8, 'HandleVisibility', 'off');
+xline(0, 'k-', 'LineWidth', 0.8, 'HandleVisibility', 'off');
+grid on;
+xlim([-180, 40]);
+ylim([-150, 150]);
+title('Region de polos dominantes en el plano s (Punto 2.a)');
+xlabel('Eje Real \sigma (1/s)');
+ylabel('Eje Imaginario j\omega (rad/s)');
+legend('Location', 'southwest');
+saveas(fig2a, fullfile(fig_dir, 'pi_punto2a_region_s.png'));
+close(fig2a);
+
+%% 2.b: Centro de las asintotas sigma_a en funcion de z
 % Polos de L(s) = Gc(s)*G(s): 0, -100, -212.766 rad/s (n = 3)
 % Ceros de L(s): -z (m = 1)
+% Exceso de polos sobre ceros: n - m = 3 - 1 = 2
+% Angulos de las asintotas:
+%   phi_k = (2*k + 1)*180° / (n - m) = (2*k + 1)*180° / 2
+%   k = 0 => phi_0 = 90°
+%   k = 1 => phi_1 = 270° = -90°
+% Al ser los angulos exactamente +-90°, las asintotas son estrictamente verticales.
+%
+% Centro de asintotas:
 % sigma_a = (suma_polos - suma_ceros) / (n - m)
 % sigma_a = (0 - 100 - 212.766 - (-z)) / 2 = (z - 312.766) / 2
-% Condición: sigma_a < -40 rad/s => z < 312.766 - 80 = 232.766 rad/s
+% Condicion: sigma_a < -40 rad/s => z < 312.766 - 80 = 232.766 rad/s
 z_max_asintota = 312.766 - 80;
 
-fprintf('\n=== PUNTO 2.b: CENTRO DE ASÍNTOTAS ===\n');
-fprintf('sigma_a(z) = (z - 312.77) / 2\n');
+fprintf('\n=== PUNTO 2.b: ASINTOTAS DEL LUGAR DE LAS RAICES ===\n');
+fprintf('Numero de polos n = 3, ceros m = 1 => n - m = 2\n');
+fprintf('Angulos de asintotas: phi = +-90° (estrictamente verticales)\n');
+fprintf('Centro de asintotas: sigma_a(z) = (z - 312.77) / 2\n');
 fprintf('Para que sigma_a quede a la izquierda de -40 rad/s: z < %.2f rad/s\n', z_max_asintota);
+
 
 %% 2.c: Elección de z y diseño con xi = 0.69
 % Análisis de la ubicación del cero z:
