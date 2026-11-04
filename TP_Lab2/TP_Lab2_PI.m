@@ -73,28 +73,34 @@ fprintf('xi minimo para PO <= 5%%:          %.4f (~0.69)\n', xi_min);
 fprintf('sigma minimo (xi*wn) para Ts<=0.1s: %.2f rad/s\n', sigma_min);
 
 % Grafico de la region de polos dominantes en el plano s
-fig2a = figure('Name', 'Punto 2.a: Region admisible en el plano s', 'Position', [100, 100, 680, 480], 'Visible', 'off');
+fig2a = figure('Name', 'Punto 2.a: Region admisible en el plano s', 'Position', [100, 100, 700, 480], 'Visible', 'off');
 hold on;
-sig_grid = linspace(-180, -sigma_min, 200);
+sig_grid = linspace(-180, -sigma_min, 300);
 w_top = -sig_grid * tan(theta_rad);
 w_bot =  sig_grid * tan(theta_rad);
 fill([sig_grid, fliplr(sig_grid)], [w_bot, fliplr(w_top)], [0.85 0.95 0.85], ...
-    'EdgeColor', 'none', 'DisplayName', 'Region admisible');
-r_line = linspace(0, 220, 100);
+    'EdgeColor', 'none', 'DisplayName', 'Región admisible');
+
+r_line = linspace(0, 220, 150);
 plot(-r_line*cos(theta_rad),  r_line*sin(theta_rad), 'b-', 'LineWidth', 1.8, ...
-    'DisplayName', sprintf('Limite PO \\le 5%%%% (\\xi = %.2f, \\theta = %.1f°)', xi_min, rad2deg(theta_rad)));
+    'DisplayName', sprintf('Límite PO \\leq 5%%%% (\\xi = %.2f, \\theta = %.1f^\\circ)', xi_min, rad2deg(theta_rad)));
 plot(-r_line*cos(theta_rad), -r_line*sin(theta_rad), 'b-', 'LineWidth', 1.8, 'HandleVisibility', 'off');
 xline(-sigma_min, 'r--', 'LineWidth', 1.8, ...
-    'DisplayName', sprintf('Limite Ts \\le 0.10 s (\\xi\\omega_n \\ge %d rad/s)', sigma_min));
+    'DisplayName', sprintf('Límite T_s \\leq 0.10 s (\\xi\\omega_n \\geq %d rad/s)', sigma_min));
 yline(0, 'k-', 'LineWidth', 0.8, 'HandleVisibility', 'off');
 xline(0, 'k-', 'LineWidth', 0.8, 'HandleVisibility', 'off');
 grid on;
 xlim([-180, 40]);
 ylim([-150, 150]);
-title('Region de polos dominantes en el plano s (Punto 2.a)');
+title('Región de polos dominantes en el plano s (Punto 2.a)');
 xlabel('Eje Real \sigma (1/s)');
 ylabel('Eje Imaginario j\omega (rad/s)');
 legend('Location', 'southwest');
+
+text(-sigma_min - 3, 110, '\xi\omega_n = 40', 'Color', 'r', 'FontWeight', 'bold', 'HorizontalAlignment', 'right');
+text(-120, 125, 'Cono \xi \geq 0.69', 'Color', 'b', 'FontWeight', 'bold');
+text(-120, 20, {'Región', 'admisible'}, 'Color', [0 0.5 0], 'FontWeight', 'bold', 'HorizontalAlignment', 'center');
+
 saveas(fig2a, fullfile(fig_dir, 'pi_punto2a_region_s.png'));
 close(fig2a);
 
