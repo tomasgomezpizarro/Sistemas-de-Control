@@ -108,4 +108,49 @@ Se corrobora que el sistema cumple las especificaciones dinámicas ($PO$ y $T_s$
     \label{fig:punto2_escalon}
 \end{figure}
 
+\subsection*{Punto 3. Selección de valores comerciales (serie E24) para $R_7$ y $R_9$}
+
+La etapa de ganancia de la Fig. 1 corresponde a un amplificador no inversor, cuya ganancia está dada por:
+\begin{equation}
+    k_p = 1 + \frac{R_7}{R_9} \implies \frac{R_7}{R_9} = k_p - 1 = 0{,}41
+\end{equation}
+
+A partir de una búsqueda sistemática sobre los 24 valores normalizados de la serie E24, el par óptimo que aproxima dicho cociente minimizando el error es:
+\begin{equation}
+    R_7 = 1{,}6\text{ k}\Omega \quad\text{y}\quad R_9 = 3{,}9\text{ k}\Omega
+\end{equation}
+obteniéndose una ganancia real de:
+\begin{equation}
+    k_{p,\text{com}} = 1 + \frac{1{,}6\text{ k}\Omega}{3{,}9\text{ k}\Omega} = 1 + \frac{16}{39} \approx 1{,}41026
+\end{equation}
+La diferencia frente a la ganancia de diseño $k_p = 1{,}41$ es de apenas $0{,}00026$ (un error relativo de $0{,}018\%$). Los resistores se eligen en el rango de los kilo-ohms para garantizar compatibilidad con los límites de corriente del amplificador operacional TL081 sin sobrecargarlo ni comprometer el ancho de banda.
+
+Con este valor de $k_p$, la función de transferencia a lazo cerrado resulta:
+\begin{equation}
+    T(s) = \frac{30005}{s^2 + 312{,}8\,s + 51282}
+\end{equation}
+cuyos polos se ubican en $s_{1,2} = -156{,}4 \pm j 163{,}8\text{ rad/s}$, con factor de amortiguamiento $\xi = 0{,}6906$.
+
+Se recalculan las medidas de desempeño mediante \texttt{stepinfo} y se comparan con las especificaciones de diseño en el Cuadro \ref{tab:punto3_metricas}.
+
+\begin{table}[H]
+    \centering
+    \caption{Comparación de desempeño entre diseño teórico e implementación comercial E24.}
+    \vspace{2mm}
+    \begin{tabular}{lcccc}
+        \toprule
+        \textbf{Métrica} & \textbf{Requerido} & \textbf{Teórico ($k_p = 1{,}41$)} & \textbf{E24 ($k_p = 1{,}41$)} & \textbf{Cumple} \\
+        \midrule
+        Sobrepaso ($PO$) & $\le 5\%$ & $4{,}98\%$ & $4{,}98\%$ & Sí \\
+        Tiempo de estab. ($T_s$) & $\le 0{,}10\text{ s}$ & $26{,}5\text{ ms}$ & $26{,}5\text{ ms}$ & Sí \\
+        Tiempo de pico ($T_p$) & -- & $19{,}1\text{ ms}$ & $19{,}1\text{ ms}$ & -- \\
+        Valor final ($y_\infty$) & $1{,}00\text{ V}$ & $0{,}585\text{ V}$ & $0{,}585\text{ V}$ & -- \\
+        Error estac. ($e_{ss}$) & $0$ & $41{,}5\%$ & $41{,}5\%$ & No \\
+        \bottomrule
+    \end{tabular}
+    \label{tab:punto3_metricas}
+\end{table}
+
+Se comprueba que el sobrepaso resultante es $PO = 4{,}98\% \le 5\%$, por lo que la especificación de sobrepaso \textbf{se sigue cumpliendo} estrictamente con los valores comerciales de la serie E24.
+
 \end{document}

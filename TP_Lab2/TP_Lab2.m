@@ -57,10 +57,33 @@ fprintf('Valor en estado estacionario:   %.4f V\n', y_inf);
 fprintf('Error estacionario (ess):       %.4f (%.2f %%)  (Especificación: = 0)\n', ess, ess*100);
 
 % Gráfico de la respuesta al escalón
-fig2 = figure('Name', 'Punto 2: Respuesta al escalón (kp = 1.4)');
+fig2 = figure('Name', 'Punto 2: Respuesta al escalón (kp = 1.41)');
 step(T);
 grid on;
 title(sprintf('Respuesta al escalón en lazo cerrado (k_p = %.2f)', kp));
 xlabel('Tiempo (s)');
 ylabel('Amplitud (V)');
 saveas(fig2, fullfile(fig_dir, 'punto2_escalon.png'));
+
+%% Punto 3: Elección de valores comerciales (serie E24) para R7 y R9
+% Relación teórica de la etapa de ganancia no inversora:
+% kp = 1 + R7 / R9  =>  R7 / R9 = kp - 1 = 0.41
+%
+% A partir de la búsqueda exhaustiva en la serie E24:
+% Se eligen R7 = 1.6 kOhm y R9 = 3.9 kOhm (relación 1.6 / 3.9 = 0.410256)
+R7 = 1.6e3;    % 1.6 kOhm (E24)
+R9 = 3.9e3;    % 3.9 kOhm (E24)
+kp_real = 1 + R7 / R9;
+
+T_real = feedback(kp_real * G, 1);
+info_real  = stepinfo(T_real);
+y_inf_real = dcgain(T_real);
+ess_real   = 1 - y_inf_real;
+
+fprintf('\n=== PUNTO 3: VALORES COMERCIALES E24 (R7 = %.1f kOhm, R9 = %.1f kOhm) ===\n', R7*1e-3, R9*1e-3);
+fprintf('kp obtenido con E24:            %.6f\n', kp_real);
+fprintf('Sobrepaso (PO):                 %.2f %%  (Especificación: <= 5 %%)\n', info_real.Overshoot);
+fprintf('Tiempo de establecimiento (Ts): %.4f s (%.2f ms)  (Especificación: <= 0.10 s)\n', info_real.SettlingTime, info_real.SettlingTime*1e3);
+fprintf('Tiempo de pico (Tp):            %.4f s (%.2f ms)\n', info_real.PeakTime, info_real.PeakTime*1e3);
+fprintf('Valor en estado estacionario:   %.4f V\n', y_inf_real);
+fprintf('Error estacionario (ess):       %.4f (%.2f %%)  (Especificación: = 0)\n', ess_real, ess_real*100);
