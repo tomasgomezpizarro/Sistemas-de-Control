@@ -42,7 +42,7 @@ ylabel('Eje Imaginario (rad/s)');
 grid on;
 
 %% Punto 2: Verificación de la respuesta al escalón en lazo cerrado
-kp = 1.4;
+kp = 1.41;
 T = feedback(kp * G, 1);
 
 info  = stepinfo(T);
