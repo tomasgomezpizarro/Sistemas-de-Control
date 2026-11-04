@@ -158,7 +158,10 @@ Esta diferencia estructural se ilustra en la Figura \ref{fig:pi_comp_z}.
     \label{fig:pi_comp_z}
 \end{figure}
 
-Para satisfacer simultáneamente la cota de las asíntotas ($\sigma_a < -40\text{ rad/s} \implies z < 232{,}77\text{ rad/s}$) y evitar el polo real lento ($z > 100\text{ rad/s}$), se selecciona:
+\textbf{Evaluación de la alternativa de cancelación polo-cero ($z = 100\text{ rad/s}$):}
+Se analizó la posibilidad de adoptar $z = 100\text{ rad/s}$ para cancelar el polo de la planta en $s = -100\text{ rad/s}$, reduciendo el sistema a segundo orden con polos en $0$ y $-212{,}77\text{ rad/s}$ y punto de ruptura en $\sigma = -106{,}38\text{ rad/s}$ ($T_s \approx 38\text{ ms}$). Incluso ante tolerancias reales de componentes ($z \approx 100$), el residuo de la fracción simple del polo imperfectamente cancelado es proporcional a $(z - 100)$, resultando en una amplitud transitoria casi nula. Sin embargo, se descartó este camino porque al eliminar algebraicamente el cero se suprime la dependencia paramétrica de $\sigma_a(z)$ deducida en el Punto 2.b y se pierde la presencia del cero en lazo cerrado cuyo efecto sobre el sobrepaso se solicita evaluar en el Punto 2.d.
+
+Por ello, para satisfacer simultáneamente la cota de las asíntotas ($\sigma_a < -40\text{ rad/s} \implies z < 232{,}77\text{ rad/s}$) y asegurar que el par complejo domine la dinámica sin depender de cancelaciones algebraicas, se adopta:
 \begin{equation}
     z = 120\text{ rad/s}
 \end{equation}
