@@ -187,13 +187,10 @@ close(fig_comp_z);
 % Cálculo de parámetros con z = 120 rad/s
 sigma_a = (z_pi - 312.766) / 2; % -96.38 rad/s
 
-% Gráfico del Lugar de las Raíces con diseño y cotas
+% Gráfico del Lugar de las Raíces con diseño y cotas (análogo al Punto 1)
 fig_lgr = figure('Name', 'Punto 2: LGR con PI (z = 120)', 'Visible', 'off');
 rlocus(L_unit);
-hold on;
-sgrid([0.69, 0.75], []);
-xline(-sigma_min, 'k--', 'LineWidth', 1.2, 'DisplayName', '\sigma = -40 s^{-1} (T_s \le 0.10 s)');
-xline(sigma_a, 'm:', 'LineWidth', 1.2, 'DisplayName', sprintf('\\sigma_a = %.1f s^{-1}', sigma_a));
+sgrid(0.69, []);
 title(sprintf('Lugar de las Raíces con controlador PI (z = %d rad/s)', z_pi));
 xlabel('Eje Real (1/s)');
 ylabel('Eje Imaginario (rad/s)');
@@ -209,8 +206,8 @@ info_ini = stepinfo(T_ini);
 idx_c = find(abs(imag(p_ini)) > 1e-3);
 
 % Ajuste a xi = 0.75 para contrarrestar el cero:
-kp_aj = 0.68;
-ki_aj = kp_aj * z_pi; % 81.6
+kp_aj = 0.73;
+ki_aj = kp_aj * z_pi; % 87.6
 T_aj = feedback(kp_aj * L_unit, 1);
 info_aj = stepinfo(T_aj);
 [wn_aj, xi_aj, p_aj] = damp(T_aj);
@@ -222,14 +219,6 @@ fprintf('Polos en lazo cerrado:          %.1f +- %.1fj,  %.1f rad/s\n', ...
     real(p_ini(idx_c(1))), imag(p_ini(idx_c(1))), real(p_ini(3)));
 fprintf('Sobrepaso obtenido (PO):        %.2f %%  (Especificación: <= 5 %%)\n', info_ini.Overshoot);
 fprintf('Tiempo de establecimiento (Ts): %.4f s (%.2f ms)\n', info_ini.SettlingTime, info_ini.SettlingTime*1e3);
-
-% Marcamos polos iniciales y ajustados en el gráfico de LGR
-plot(real(p_ini), imag(p_ini), 'r*', 'MarkerSize', 8, 'LineWidth', 1.5, ...
-    'DisplayName', sprintf('k_p = %.2f (\\xi = 0.69, PO = %.1f %%)', kp_ini, info_ini.Overshoot));
-plot(real(p_aj), imag(p_aj), 'bd', 'MarkerFaceColor', 'b', 'MarkerSize', 6, ...
-    'DisplayName', sprintf('k_p = %.2f (\\xi = 0.75, PO = %.1f %%)', kp_aj, info_aj.Overshoot));
-legend('Location', 'northwest');
-saveas(fig_lgr, fullfile(fig_dir, 'pi_punto2_lgr.png'));
 close(fig_lgr);
 
 %% 2.d: Verificación y ajuste de kp por el cero de lazo cerrado

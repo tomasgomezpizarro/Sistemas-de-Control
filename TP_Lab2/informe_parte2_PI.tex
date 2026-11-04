@@ -143,20 +143,11 @@ Para que las asíntotas queden a la izquierda de la cota $\text{Re}(s) = -40\tex
 \end{equation}
 
 \subsubsection*{2.c. Elección de la posición del cero $z$ y diseño preliminar}
-Para fijar la posición del cero $z$, se analiza la distribución de las ramas del Lugar de las Raíces sobre el eje real:
+Para la elección del cero $z$, si bien cualquier valor en el intervalo $0 < z < 232{,}77\text{ rad/s}$ cumple formalmente la condición del centroide de asíntotas ($\sigma_a < -40\text{ rad/s}$), la distribución de las ramas del Lugar de las Raíces sobre el eje real impone una restricción de diseño fundamental:
 \begin{itemize}
-    \item \textbf{Si se elige $z < 100\text{ rad/s}$ (por ejemplo, $z = 50\text{ rad/s}$):} El segmento del eje real entre $[-z, 0]$ posee un polo a su derecha (el polo en el origen), por lo que pertenece al Lugar de las Raíces. En consecuencia, la rama que parte de $s = 0$ termina en el cero en $s = -z$. Para ganancias moderadas se genera un polo real lento atrapado en dicho intervalo (en este caso, en $s \approx -35\text{ rad/s}$). Al tener parte real $\sigma = -35\text{ rad/s} > -40\text{ rad/s}$, este polo domina la dinámica temporal e incrementa el tiempo de establecimiento a $T_s > 0{,}11\text{ s}$, incumpliendo la especificación.
-    \item \textbf{Si se elige $z > 100\text{ rad/s}$:} El intervalo que pertenece al Lugar de las Raíces es $[-100, 0]$. Las dos ramas que parten de $0$ y $-100$ colisionan en un punto de ruptura y emergen al plano complejo, conformando el par complejo dominante. La rama que parte del polo en $-212{,}77\text{ rad/s}$ termina en el cero en $-z$, dejando al tercer polo real confinado a la izquierda de $-z$, con una dinámica rápida que no degrada el tiempo de respuesta.
+    \item \textbf{Descarte de $z < 100\text{ rad/s}$:} En esta región, el segmento $[-z,\, 0]$ pertenece al Lugar de las Raíces. La rama que parte del polo en el origen ($s = 0$) termina en el cero en $s = -z$ sobre el eje real, dejando un polo real de lazo cerrado atrapado entre $0$ y $-z$. Al quedar este polo real más próximo al eje imaginario que las ramas complejas, pasa a ser el polo dominante del sistema. Esto invalida la aproximación de segundo orden y anula la posibilidad de lograr el factor de amortiguamiento deseado ($\xi = 0{,}69$) a través del par complejo.
+    \item \textbf{Elección con $z \ge 100\text{ rad/s}$:} En este caso, el segmento del eje real que pertenece al Lugar de las Raíces es $[-100,\, 0]$. Las dos ramas que parten de $0$ y $-100\text{ rad/s}$ colisionan en un punto de ruptura y emergen al plano complejo, constituyendo el par complejo dominante con el amortiguamiento deseado. A su vez, la rama que parte del polo en $-212{,}77\text{ rad/s}$ termina en el cero en $-z$, confinando el polo real a la izquierda de $-z$, donde decae rápidamente sin distorsionar la dinámica del par complejo.
 \end{itemize}
-
-Esta diferencia estructural se ilustra en la Figura \ref{fig:pi_comp_z}.
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.92\textwidth]{figuras/pi_punto2_comparacion_z.png}
-    \caption{Influencia de la ubicación del cero $z$ en el Lugar de las Raíces. Izquierda: con $z = 50\text{ rad/s}$, un polo real queda confinado cerca del origen en $[-z, 0]$. Derecha: con $z = 120\text{ rad/s}$, las ramas de $0$ y $-100$ generan el par complejo dominante y el polo real se sitúa a la izquierda de $-120\text{ rad/s}$.}
-    \label{fig:pi_comp_z}
-\end{figure}
 
 \textbf{Evaluación de la alternativa de cancelación polo-cero ($z = 100\text{ rad/s}$):}
 Se analizó la posibilidad de adoptar $z = 100\text{ rad/s}$ para cancelar el polo de la planta en $s = -100\text{ rad/s}$, reduciendo el sistema a segundo orden con polos en $0$ y $-212{,}77\text{ rad/s}$ y punto de ruptura en $\sigma = -106{,}38\text{ rad/s}$ ($T_s \approx 38\text{ ms}$). Incluso ante tolerancias reales de componentes ($z \approx 100$), el residuo de la fracción simple del polo imperfectamente cancelado es proporcional a $(z - 100)$, resultando en una amplitud transitoria casi nula. Sin embargo, se descartó este camino porque al eliminar algebraicamente el cero se suprime la dependencia paramétrica de $\sigma_a(z)$ deducida en el Punto 2.b y se pierde la presencia del cero en lazo cerrado cuyo efecto sobre el sobrepaso se solicita evaluar en el Punto 2.d.
@@ -167,19 +158,19 @@ Por ello, para satisfacer simultáneamente la cota de las asíntotas ($\sigma_a 
 \end{equation}
 Con este valor, el centro de las asíntotas se sitúa en $\sigma_a = (120 - 312{,}77)/2 = -96{,}38\text{ rad/s} \ll -40\text{ rad/s}$.
 
-Trazando el Lugar de las Raíces con $z = 120\text{ rad/s}$ en MATLAB (Figura \ref{fig:pi_lgr}) y buscando la intersección con la recta de amortiguamiento $\xi = 0{,}69$, se obtiene la ganancia inicial:
+Trazando el Lugar de las Raíces con $z = 120\text{ rad/s}$ en MATLAB (Figura \ref{fig:pi_lgr}) y mediante la selección interactiva sobre la cota de amortiguamiento $\xi = 0{,}69$, se obtiene la ganancia inicial:
 \begin{equation}
     k_p \approx 0{,}84 \implies k_i = k_p \cdot z = 0{,}84 \times 120 \approx 100{,}8\text{ rad/s}
 \end{equation}
-Los polos de lazo cerrado correspondientes son:
+con polos en lazo cerrado en:
 \begin{equation}
-    s_{1,2} \approx -84{,}1 \pm j 88{,}1\text{ rad/s} \quad (\xi = 0{,}6905), \qquad s_3 \approx -144{,}6\text{ rad/s}
+    s_{1,2} \approx -83{,}9 \pm j 88{,}2\text{ rad/s} \quad (\xi = 0{,}690), \qquad s_3 \approx -144{,}6\text{ rad/s}
 \end{equation}
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.75\textwidth]{figuras/pi_punto2_lgr.png}
-    \caption{Lugar de las Raíces con controlador PI ($z = 120\text{ rad/s}$), cotas de diseño ($\xi = 0{,}69$, $\sigma = -40\text{ rad/s}$), centro de asíntotas $\sigma_a = -96{,}4\text{ rad/s}$ y ubicación de polos para $k_p = 0{,}84$ y $k_p = 0{,}68$.}
+    \caption{Lugar de las Raíces con controlador PI ($z = 120\text{ rad/s}$) en MATLAB y selección interactiva de $k_p = 0{,}84$ sobre la cota $\xi = 0{,}69$.}
     \label{fig:pi_lgr}
 \end{figure}
 
@@ -204,18 +195,18 @@ Durante la etapa de subida, la derivada es estrictamente positiva, lo que antici
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.75\textwidth]{figuras/pi_punto2_efecto_cero.png}
-    \caption{Efecto del cero de lazo cerrado en $s = -120\text{ rad/s}$ sobre la respuesta al escalón y compensación mediante el ajuste de ganancia a $k_p = 0{,}68$.}
+    \caption{Efecto del cero de lazo cerrado en $s = -120\text{ rad/s}$ sobre la respuesta al escalón y compensación mediante el ajuste fino de ganancia a $k_p = 0{,}73$.}
     \label{fig:pi_efecto_cero}
 \end{figure}
 
-\textbf{Compensación de la ganancia:} Para reducir el sobrepaso por debajo del $5\%$, se incrementa el amortiguamiento de los polos complejos a $\xi \approx 0{,}75$, reduciendo la ganancia sobre el Lugar de las Raíces:
+\textbf{Compensación de la ganancia:} Para reducir el sobrepaso por debajo del $5\%$, se realiza un ajuste fino iterativo disminuyendo progresivamente la ganancia sobre el Lugar de las Raíces. Se comprueba empíricamente que con:
 \begin{equation}
-    k_p = 0{,}68 \implies k_i = 0{,}68 \times 120 = 81{,}6\text{ rad/s}
+    k_p = 0{,}73 \implies k_i = 0{,}73 \times 120 = 87{,}6\text{ rad/s}
 \end{equation}
-Con este valor, las medidas temporales obtenidas son:
+el sistema calza justo en el límite de la especificación dinámica requerida maximizando el ancho de banda, con polos en $s_{1,2} \approx -81{,}2 \pm j 76{,}2\text{ rad/s}$ ($\xi \approx 0{,}729$) y $s_3 \approx -150{,}5\text{ rad/s}$. Las métricas temporales resultan:
 \begin{itemize}
-    \item $PO = 4{,}14\% \le 5\%$ \quad $\rightarrow$ \textbf{Cumple}.
-    \item $T_s = 54{,}5\text{ ms} \le 100\text{ ms}$ \quad $\rightarrow$ \textbf{Cumple}.
+    \item $PO = 4{,}97\% \le 5\%$ \quad $\rightarrow$ \textbf{Cumple} (calza en la cota admisible).
+    \item $T_s = 52{,}8\text{ ms} \le 100\text{ ms}$ \quad $\rightarrow$ \textbf{Cumple}.
     \item $e_{ss} = 0$ \quad $\rightarrow$ \textbf{Cumple}.
 \end{itemize}
 
@@ -250,9 +241,13 @@ Fijando el capacitor en $C_{PI} = 0{,}1\,\mu\text{F}$ según la consigna, se dim
     \begin{equation}
         R_{PI2} = \frac{1}{z \cdot C_{PI}} = \frac{1}{120 \times 0{,}1\times 10^{-6}} = 83{,}33\text{ k}\Omega \implies \mathbf{R_{PI2} = 82\text{ k}\Omega \quad (\text{E24})}
     \end{equation}
-    \item Para obtener la ganancia $k_p \approx 0{,}68$:
+    \item Para aproximar la ganancia de diseño $k_p \approx 0{,}73$ con componentes comerciales:
     \begin{equation}
-        R_{PI1} = \frac{R_{PI2}}{k_p} = \frac{82\text{ k}\Omega}{0{,}68} \approx 120{,}58\text{ k}\Omega \implies \mathbf{R_{PI1} = 120\text{ k}\Omega \quad (\text{E24})}
+        R_{PI1} = \frac{R_{PI2}}{k_p} = \frac{82\text{ k}\Omega}{0{,}73} \approx 112{,}33\text{ k}\Omega
+    \end{equation}
+    En la serie E24, el valor inferior inmediato $110\text{ k}\Omega$ daría $k_p = 82/110 \approx 0{,}7455$, elevando el sobrepaso a $PO = 5{,}70\% > 5\%$. Por lo tanto, con un criterio conservador frente a tolerancias (análogo al adoptado en la Primera Parte), se elige el valor comercial superior:
+    \begin{equation}
+        \mathbf{R_{PI1} = 120\text{ k}\Omega \quad (\text{E24})}
     \end{equation}
 \end{itemize}
 
@@ -261,22 +256,7 @@ Los valores efectivos del controlador con los componentes comerciales adoptados 
     k_p = \frac{82\text{ k}\Omega}{120\text{ k}\Omega} = 0{,}6833, \quad k_i = \frac{1}{120\text{ k}\Omega \times 0{,}1\,\mu\text{F}} = 83{,}33\text{ rad/s}, \quad z = \frac{83{,}33}{0{,}6833} = 121{,}95\text{ rad/s}
 \end{equation}
 
-Evaluando la respuesta temporal con estos parámetros efectivos:
-\begin{itemize}
-    \item $PO = 4{,}63\% \le 5\%$ \quad $\rightarrow$ \textbf{Cumple}.
-    \item $T_s = 54{,}7\text{ ms} \le 100\text{ ms}$ \quad $\rightarrow$ \textbf{Cumple}.
-    \item $e_{ss} = 0$ \quad $\rightarrow$ \textbf{Cumple}.
-\end{itemize}
 
-La Figura \ref{fig:pi_step_e24} presenta la respuesta temporal ante escalón unitario comparando el modelo continuo ajustado y la implementación con componentes comerciales E24, junto con las bandas de tolerancia del $\pm 2\%$.
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.75\textwidth]{figuras/pi_punto3_escalon_e24.png}
-    \caption{Respuesta al escalón del sistema con controlador PI: comparación entre el diseño continuo ($k_p = 0{,}68$, $k_i = 81{,}6$) y la implementación con componentes comerciales E24 ($R_{PI1} = 120\text{ k}\Omega$, $R_{PI2} = 82\text{ k}\Omega$, $C_{PI} = 0{,}1\,\mu\text{F}$).}
-    \label{fig:pi_step_e24}
-\end{figure}
-
-Todos los cálculos, simulaciones temporales y figuras presentadas en esta sección se generan ejecutando el script \texttt{TP\_Lab2\_PI.m}.
+Todos los cálculos y figuras de esta sección se generan ejecutando el script \texttt{TP\_Lab2.m}.
 
 \end{document}
