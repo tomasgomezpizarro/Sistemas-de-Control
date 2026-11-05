@@ -14,7 +14,7 @@
 
 ## 3. Estructura de Archivos
 - consigna_TP_Lab2.pdf: enunciado y anexo de Simscape (Tabla A0 con los parámetros del TL081).
-- iguras/: esquemas y gráficos del informe.
+- `figuras/`: esquemas y gráficos del informe.
 - TP_Lab2.m: script único y autocontenido con todos los cálculos, diseños (P y PI) y simulaciones.
 - TP_Lab2_TL081.slx: modelo circuital en Simscape con operacionales reales TL081 para el lazo con control P.
 - TP_Lab2_PI_TL081.slx: modelo circuital en Simscape con operacionales reales TL081 para el lazo con control PI.
@@ -29,4 +29,5 @@ Informe con resumen teórico, deducciones completas, resultados de simulación c
 - **Punto 3 (Control P - Valores comerciales E24)**: Completo. Búsqueda sistemática sobre la serie E24: $R_7 = 1{,}6\text{ k}\Omega$, $R_9 = 3{,}9\text{ k}\Omega \implies k_p \approx 1{,}4103$. Recálculo y verificación de cumplimiento de $PO \le 5\%$.
 - **Punto 4 (Control P - Simulación circuital en Simscape con TL081)**: Completo. Modelo `TP_Lab2_TL081.slx` derivado y adaptado de TP1. Superposición con FT graficada (`figuras/punto4_simscape_vs_ft.png`), error máximo cuantificado ($0{,}017\text{ mV}$) y parámetros medidos con `stepinfo`.
 - **Segunda Parte (Control PI)**: Puntos 1, 2 y 3 analíticos completos. Punto 4.a (simulación en Simscape con `TP_Lab2_PI_TL081.slx`, superposición con FT y error máximo cuantificado en $0{,}032\text{ mV}$) y Punto 4.b completados.
-- **Punto 5 (Comparación final)**: Completo y unificado en `TP_Lab2.m`. Superposición de respuestas en Simscape graficada (`figuras/punto5_comparacion_p_vs_pi.png`), tabla comparativa de desempeño y conclusiones sobre el efecto de la acción integral.
+- **Punto 4.c**: Completo. A_lim ≈ 7,30 V (pico de vPI = 8,5 V); con A = 8 V satura: PO = 3,56 %, Ts = 61,6 ms. Figura `figuras/pi_punto4c_saturacion.png`.
+- **Punto 5 (Comparación final)**: Completo (figura, tabla y discusión en el informe). Conclusiones generales escritas.

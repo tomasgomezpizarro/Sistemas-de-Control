@@ -15,12 +15,16 @@ end
 
 %% Configuración de visualización
 % true: abre las ventanas de las figuras; false: segundo plano y guarda PNGs
-mostrar_graficos = true;
+mostrar_graficos = false;
 if mostrar_graficos
     vis_opt = 'on';
 else
     vis_opt = 'off';
 end
+% Figuras con fondo claro (para el informe impreso), independiente del tema de MATLAB
+s_cfg = settings;
+s_cfg.matlab.appearance.figure.GraphicsTheme.TemporaryValue = 'light';
+set(groot, 'defaultFigureColor', 'w');
 
 %% =========================================================================
 %% MODELO DE LA PLANTA G(s)
@@ -321,13 +325,13 @@ t_cero = linspace(0, 0.10, 2000);
 [y_aj_c, ~]    = step(T_aj, t_cero);
 
 plot(t_p*1e3, y_proto, 'k--', 'LineWidth', 1.5, ...
-    'DisplayName', sprintf('Prototipo 2^{do} orden sin cero (\xi = 0.69, PO = %.2f %%)', info_proto.Overshoot));
+    'DisplayName', sprintf('Prototipo 2^{do} orden sin cero (\\xi = 0.69, PO = %.2f %%)', info_proto.Overshoot));
 hold on;
 plot(t_p*1e3, y_ini_c, 'r-', 'LineWidth', 1.8, ...
     'DisplayName', sprintf('Sistema PI k_p = %.2f (con cero z = %d, PO = %.2f %%)', kp_ini, z_pi, info_ini.Overshoot));
 plot(t_p*1e3, y_aj_c, 'b-.', 'LineWidth', 1.8, ...
     'DisplayName', sprintf('Sistema PI compensado k_p = %.2f (PO = %.2f %%)', kp_aj, info_aj.Overshoot));
-yline(1.0, 'k:');
+yline(1.0, 'k:', 'HandleVisibility', 'off');
 yline(1.05, 'm:', 'LineWidth', 1.1, 'DisplayName', 'Límite PO = 5%');
 grid on;
 title('Efecto del cero de lazo cerrado sobre el sobrepaso transitorio');
@@ -369,11 +373,11 @@ t_sim_step = linspace(0, 0.12, 3000);
 [y_c, t_out] = step(T_com, t_sim_step);
 
 plot(t_out*1e3, y_aj, 'b--', 'LineWidth', 1.6, ...
-    'DisplayName', sprintf('Continuo k_p = 0.68 (PO = %.2f %%, T_s = %.1f ms)', info_aj.Overshoot, info_aj.SettlingTime*1e3));
+    'DisplayName', sprintf('Continuo k_p = %.2f (PO = %.2f %%, T_s = %.1f ms)', kp_aj, info_aj.Overshoot, info_aj.SettlingTime*1e3));
 hold on;
 plot(t_out*1e3, y_c, 'k-', 'LineWidth', 2.0, ...
     'DisplayName', sprintf('E24: R_{PI1}=120k, R_{PI2}=82k (PO = %.2f %%, T_s = %.1f ms)', info_com.Overshoot, info_com.SettlingTime*1e3));
-yline(1.0, 'k:');
+yline(1.0, 'k:', 'HandleVisibility', 'off');
 yline(1.02, 'g:', 'LineWidth', 1.0, 'DisplayName', 'Banda \\pm 2%%');
 yline(0.98, 'g:', 'LineWidth', 1.0, 'HandleVisibility', 'off');
 xline(info_com.SettlingTime*1e3, 'r:', 'LineWidth', 1.2, ...
@@ -423,7 +427,7 @@ if exist([mdl_pi '.slx'], 'file') || exist(fullfile(script_dir, [mdl_pi '.slx'])
     plot(t_unif_pi * 1e3, y_ft_pi, 'b-', 'LineWidth', 2.0, 'DisplayName', 'Modelo Lineal FT (T_{com})');
     hold on;
     plot(t_sim_pi * 1e3, y_sim_pi, 'r--', 'LineWidth', 1.4, 'DisplayName', 'Circuito Simscape (TL081)');
-    yline(1.0, 'k:');
+    yline(1.0, 'k:', 'HandleVisibility', 'off');
     yline(1.02, 'g:', 'LineWidth', 0.8, 'DisplayName', 'Banda \\pm 2%%');
     yline(0.98, 'g:', 'LineWidth', 0.8, 'HandleVisibility', 'off');
     grid on;
@@ -442,7 +446,7 @@ if exist([mdl_pi '.slx'], 'file') || exist(fullfile(script_dir, [mdl_pi '.slx'])
     title('Tensión de salida del sistema y(t)');
     xlabel('Tiempo (ms)');
     ylabel('y(t) [V]');
-    yline(1.0, 'k:');
+    yline(1.0, 'k:', 'HandleVisibility', 'off');
 
     subplot(2, 1, 2);
     plot(t_sim_pi * 1e3, vo1_sim, 'm--', 'LineWidth', 1.4, 'DisplayName', 'v_{o1}(t) (Salida etapa PI inversora)');
@@ -461,10 +465,66 @@ if exist([mdl_pi '.slx'], 'file') || exist(fullfile(script_dir, [mdl_pi '.slx'])
     [vpi_max, idx_vpi_max] = max(vpi_sim);
     [vo1_min, idx_vo1_min] = min(vo1_sim);
     fprintf('\n=== PARTE 2 - PUNTO 4.b: TENSIONES MEDIDAS EN EL CONTROLADOR PI ===\n');
-    fprintf('Salto inicial medido vo1(0+): %.4f V\n', vo1_sim(2));
+    idx_0p = find(t_sim_pi >= 20e-6, 1);   % justo después del salto (el aporte integral en 20 us es despreciable)
+    fprintf('Salto inicial medido vo1(0+): %.4f V (en t = %.0f us)\n', vo1_sim(idx_0p), t_sim_pi(idx_0p)*1e6);
     fprintf('Tensión mínima medida vo1:    %.4f V (en t = %.2f ms)\n', vo1_min, t_sim_pi(idx_vo1_min)*1e3);
     fprintf('Pico máximo medido vPI:       %.4f V (en t = %.2f ms)\n', vpi_max, t_sim_pi(idx_vpi_max)*1e3);
     fprintf('Valor final medido vPI(inf):  %.4f V\n', vpi_sim(end));
+
+    %% Punto 4.c: Aumento de la amplitud del escalón hasta saturar vPI (±8.5 V)
+    % Mientras el circuito es lineal, vPI escala con la amplitud: el pico llega a
+    % 8.5 V para A_lim = 8.5 / max(vPI con escalón de 1 V).
+    A_lim  = 8.5 / vpi_max;
+    A_list = [1, A_lim, 8];
+    blk_step = find_system(mdl_pi, 'BlockType', 'Step');
+    blk_step = blk_step{1};
+    res_4c = struct('A', {}, 't', {}, 'y', {}, 'vpi', {}, 'info', {});
+    for k = 1:numel(A_list)
+        set_param(blk_step, 'After', num2str(A_list(k), 8));
+        out_k = sim(mdl_pi);
+        res_4c(k).A    = A_list(k);
+        res_4c(k).t    = out_k.simlog.Voltage_Sensor.V.series.time;
+        res_4c(k).y    = out_k.simlog.Voltage_Sensor.V.series.values;
+        res_4c(k).vpi  = out_k.simlog.Sensor_Vpi.V.series.values;
+        res_4c(k).info = stepinfo(res_4c(k).y, res_4c(k).t, A_list(k));
+    end
+    set_param(blk_step, 'After', '1');   % se restituye el escalón unitario
+
+    fprintf('\n=== PARTE 2 - PUNTO 4.c: AMPLITUD DEL ESCALÓN Y SATURACIÓN DE vPI ===\n');
+    fprintf('Amplitud límite (pico de vPI = 8.5 V): A_lim = %.2f V\n', A_lim);
+    fprintf('%-10s | %-12s | %-9s | %-10s\n', 'A [V]', 'max vPI [V]', 'PO [%]', 'Ts [ms]');
+    for k = 1:numel(res_4c)
+        fprintf('%-10.2f | %-12.2f | %-9.2f | %-10.1f\n', res_4c(k).A, max(res_4c(k).vpi), ...
+            res_4c(k).info.Overshoot, res_4c(k).info.SettlingTime*1e3);
+    end
+    fprintf('Modelo FT (cualquier A):             PO = %.2f %%, Ts = %.1f ms\n', info_com.Overshoot, info_com.SettlingTime*1e3);
+
+    fig4c = figure('Name', 'Parte 2 - Punto 4.c: Saturación de vPI', 'Position', [100, 100, 750, 560], 'Visible', vis_opt);
+    estilos = {'b-', 'g--', 'r-'};
+    subplot(2, 1, 1);
+    plot(t_unif_pi*1e3, y_ft_pi, 'k:', 'LineWidth', 2.0, 'DisplayName', 'Modelo FT');
+    hold on;
+    for k = 1:numel(res_4c)
+        plot(res_4c(k).t*1e3, res_4c(k).y / res_4c(k).A, estilos{k}, 'LineWidth', 1.4, ...
+            'DisplayName', sprintf('Simscape, A = %.2f V', res_4c(k).A));
+    end
+    grid on; xlim([0 120]);
+    xlabel('Tiempo (ms)'); ylabel('y(t) / A');
+    title('Salida normalizada por la amplitud del escalón');
+    legend('Location', 'southeast');
+    subplot(2, 1, 2);
+    hold on;
+    for k = 1:numel(res_4c)
+        plot(res_4c(k).t*1e3, res_4c(k).vpi, estilos{k}, 'LineWidth', 1.4, ...
+            'DisplayName', sprintf('A = %.2f V', res_4c(k).A));
+    end
+    yline(8.5, 'm:', 'LineWidth', 1.2, 'DisplayName', 'Saturación +8.5 V');
+    grid on; box on; xlim([0 120]); ylim([0 9.5]);
+    xlabel('Tiempo (ms)'); ylabel('v_{PI}(t) [V]');
+    title('Tensión de salida del controlador v_{PI}');
+    legend('Location', 'southeast');
+    saveas(fig4c, fullfile(fig_dir, 'pi_punto4c_saturacion.png'));
+    if ~mostrar_graficos, close(fig4c); end
 
     close_system(mdl_pi, 0);
 else
@@ -477,21 +537,17 @@ end
 if exist('y_sim_p', 'var') && exist('y_sim_pi', 'var')
     fig5 = figure('Name', 'Punto 5: Comparación Simscape Control P vs PI', 'Position', [100, 100, 750, 440], 'Visible', vis_opt);
     plot(t_sim_p * 1e3, y_sim_p, 'r--', 'LineWidth', 1.6, ...
-        'DisplayName', sprintf('Control P: k_p=1.41 (PO=%.1f%%, T_s=%.1f ms, e_{ss}=%.1f%%)', ...
-        info_sim_p.Overshoot, info_sim_p.SettlingTime*1e3, ess_sim_p*100));
+        'DisplayName', sprintf('Control P (k_p = %.2f)', kp_real));
     hold on;
     plot(t_sim_pi * 1e3, y_sim_pi, 'b-', 'LineWidth', 1.8, ...
-        'DisplayName', sprintf('Control PI: k_p=0.68, k_i=83.3 (PO=%.1f%%, T_s=%.1f ms, e_{ss}=%.1f%%)', ...
-        info_sim_pi.Overshoot, info_sim_pi.SettlingTime*1e3, ess_sim_pi*100));
+        'DisplayName', 'Control PI');
 
-    yline(1.0, 'k:', 'LineWidth', 1.0, 'DisplayName', 'Referencia r(t) = 1.0 V');
-    yline(1.02, 'g:', 'LineWidth', 0.8, 'DisplayName', 'Banda \pm 2% (PI)');
-    yline(0.98, 'g:', 'LineWidth', 0.8, 'HandleVisibility', 'off');
+    yline(1.0, 'k:', 'LineWidth', 1.0, 'DisplayName', 'Referencia r(t) = 1 V');
 
     grid on;
     xlim([0, 120]);
     ylim([0, 1.15]);
-    title('Comparación de la respuesta al escalón: Control P vs. Control PI (Simscape con TL081)');
+    title('Respuesta al escalón unitario en Simscape (TL081): control P y PI');
     xlabel('Tiempo (ms)');
     ylabel('Tensión de salida y(t) [V]');
     legend('Location', 'southeast', 'FontSize', 9);
@@ -508,7 +564,7 @@ if exist('y_sim_p', 'var') && exist('y_sim_pi', 'var')
     fprintf('%-25s | %15.2f ms | %15.2f ms\n', 'Tiempo de estab. (Ts 2%)', info_sim_p.SettlingTime*1e3, info_sim_pi.SettlingTime*1e3);
     fprintf('%-25s | %15.2f ms | %15.2f ms\n', 'Tiempo de pico (Tp)', info_sim_p.PeakTime*1e3, info_sim_pi.PeakTime*1e3);
     fprintf('%-25s | %16.4f V | %16.4f V\n', 'Valor final y(inf)', y_sim_p(end), y_sim_pi(end));
-    fprintf('%-25s | %15.2f %% | %15.2f %%\n', 'Error estacionario (ess)', ess_sim_p*100, ess_sim_pi*100);
+    fprintf('%-25s | %15.2f %% | %15.2f %%\n', 'Error estacionario (ess)', abs(ess_sim_p)*100, abs(ess_sim_pi)*100);
     fprintf('=========================================================================\n');
 end
 
