@@ -6,3 +6,5 @@
 *.slxc
 *.autosave
 slprj/
+*.fdb_latexmk
+*.fls

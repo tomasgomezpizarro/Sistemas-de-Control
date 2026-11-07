@@ -40,12 +40,12 @@ Las especificaciones requeridas para el sistema en lazo cerrado son:
 
 \subsection*{Punto 1. Ajuste de $k_p$ mediante el Lugar de las Raíces}
 
-La función de transferencia a lazo abierto se modela como la cascada entre la dinámica fija de la planta, $G(s)$, y la ganancia proporcional ajustable del controlador, $k_p$, resultando $L(s) = k_p \cdot G(s)$ con:
+La función de transferencia de lazo abierto es $L(s) = k_p\, G(s)$, con:
 \begin{equation}
     G(s) = \frac{1}{(R_1 C_1 s + 1)(R_2 C_2 s + 1)} = \frac{1}{(0{,}01s + 1)(0{,}0047s + 1)}
 \end{equation}
 
-El sistema es de \textbf{Tipo 0}, ya que no posee polos en el origen en lazo abierto. Ante una entrada escalón unitario $R(s) = 1/s$, la constante estática de error de posición es:
+El sistema es de tipo 0 (no tiene polos en el origen). Ante un escalón unitario, la constante de error de posición es:
 \begin{equation}
     K_p^{\text{pos}} = \lim_{s \to 0} k_p G(s) = k_p
 \end{equation}
@@ -53,27 +53,27 @@ Por lo tanto, el error en régimen permanente resulta:
 \begin{equation}
     e_{ss} = \frac{1}{1 + K_p^{\text{pos}}} = \frac{1}{1 + k_p}
 \end{equation}
-Dado que para cualquier ganancia finita $k_p < \infty$ el error es estrictamente positivo, la especificación de \textbf{$e_{ss} = 0$ no puede cumplirse} con un control proporcional puro. Lograr un error nulo requeriría una ganancia infinita, lo cual no es físicamente realizable.
+Para cualquier $k_p$ finito el error es mayor que cero, así que la especificación $e_{ss} = 0$ \textbf{no puede cumplirse} con un control proporcional: haría falta una ganancia infinita.
 
-A partir del trazado del Lugar de las Raíces de $G(s)$ en MATLAB (Fig. \ref{fig:punto1_lgr}), se analizan las especificaciones restantes:
+Con el lugar de raíces de $G(s)$ (Fig. \ref{fig:punto1_lgr}) se analizan las otras dos especificaciones:
 
 \begin{itemize}
-    \item \textbf{Tiempo de establecimiento ($T_s \le 0{,}10\text{ s}$):} Como se analizó en el Trabajo de Laboratorio 1, una vez superado el punto de ruptura ($k_p \ge 0{,}15$), las ramas del LGR se desplazan verticalmente a lo largo de una parte real fija dada por $\xi\omega_n = 156{,}4\text{ rad/s}$, independiente del valor de $k_p$. El tiempo de establecimiento al $2\%$ resulta:
+    \item \textbf{Tiempo de establecimiento ($T_s \le 0{,}10\text{ s}$):} Pasado el punto de ruptura ($k_p \ge 0{,}15$), las ramas suben en vertical con parte real fija $\xi\omega_n = 156{,}4\text{ rad/s}$, que no depende de $k_p$. Entonces:
     \begin{equation}
         T_s \approx \frac{4}{\xi\omega_n} = \frac{4}{156{,}4} \approx 0{,}0256\text{ s}
     \end{equation}
-    Este valor ($\approx 25{,}6\text{ ms}$) satisface holgadamente la cota de $0{,}10\text{ s}$ para cualquier par de polos complejos.
+    que cumple la cota de $0{,}10\text{ s}$ para cualquier $k_p$ que dé polos complejos.
 
-    \item \textbf{Sobrepaso ($PO \le 5\%$):} A partir de la expresión analítica del sobrepaso para un sistema de segundo orden:
+    \item \textbf{Sobrepaso ($PO \le 5\%$):} Para un sistema de segundo orden:
     \begin{equation}
         PO = 100 \cdot e^{-\frac{\pi \xi}{\sqrt{1 - \xi^2}}} \le 5\% \implies \xi \ge \frac{-\ln(0{,}05)}{\sqrt{\pi^2 + \ln^2(0{,}05)}} \approx 0{,}69
     \end{equation}
-    Esto delimita una región admisible en el plano complejo entre las rectas radiales de $\xi = 0{,}69$. Si bien para $k_p < 0{,}15$ el sistema es sobreamortiguado y no presenta sobrepaso ($PO = 0\%$), un valor menor de $k_p$ resulta desfavorable, ya que una de las raíces reales se desplaza hacia el origen (hacia $-100\text{ rad/s}$), volviendo la respuesta más lenta, y además el error estacionario $e_{ss} = 1/(1 + k_p)$ aumenta considerablemente.
+    Los polos tienen que quedar entre las rectas de $\xi = 0{,}69$. Con $k_p < 0{,}15$ el sistema es sobreamortiguado y no tiene sobrepaso, pero uno de los polos reales se acerca a $-100\text{ rad/s}$ (respuesta más lenta) y el error $e_{ss} = 1/(1 + k_p)$ es mayor.
 
-    \item \textbf{Criterio de selección de $k_p$:} Dado que se busca minimizar el error en régimen permanente $e_{ss} = 1/(1 + k_p)$, el objetivo principal es maximizar la ganancia $k_p$ tanto como lo permitan las especificaciones. Al seleccionar el valor máximo admisible en la frontera de $PO \le 5\%$ ($k_p \approx 1{,}41$), el factor de amortiguamiento resultante queda en $\xi \approx 0{,}69$, ubicándose oportunamente dentro del rango considerado óptimo en ingeniería ($0{,}6 \le \xi \le 0{,}8$). A su vez, esta mayor ganancia maximiza la frecuencia natural $\omega_n$, lo que disminuye los tiempos de subida y de pico del sistema.
+    \item \textbf{Criterio de selección de $k_p$:} Como el error baja al subir $k_p$, conviene el mayor $k_p$ que permita $PO \le 5\%$, es decir, el que deja los polos sobre la recta $\xi = 0{,}69$. Una ganancia mayor también aumenta $\omega_n$ y reduce los tiempos de subida y de pico.
 \end{itemize}
 
-Mediante la herramienta interactiva de MATLAB se selecciona el punto sobre la cota $\xi = 0{,}69$, obteniéndose:
+Seleccionando en MATLAB el punto del lugar de raíces sobre $\xi = 0{,}69$ se obtiene:
 \begin{equation}
     k_p \approx 1{,}41
 \end{equation}
@@ -93,13 +93,13 @@ Se obtiene la función de transferencia a lazo cerrado para $k_p = 1{,}41$:
     T(s) = \frac{k_p G(s)}{1 + k_p G(s)} = \frac{30000}{s^2 + 312{,}8\,s + 51277}
 \end{equation}
 
-A partir de la respuesta al escalón unitario evaluada en MATLAB (Fig. \ref{fig:punto2_escalon}) y mediante el comando \texttt{stepinfo}, se extraen las métricas de desempeño:
+Con la respuesta al escalón (Fig. \ref{fig:punto2_escalon}) y \texttt{stepinfo} se obtiene:
 \begin{itemize}
     \item \textbf{Sobrepaso:} $PO = 4{,}98\% \le 5\%$ \quad $\rightarrow$ \textbf{Cumple}.
     \item \textbf{Tiempo de establecimiento:} $T_s = 26{,}5\text{ ms} \le 100\text{ ms}$ \quad $\rightarrow$ \textbf{Cumple}.
     \item \textbf{Error en régimen permanente:} $e_{ss} = 1 - y(\infty) = 1 - 0{,}585 = 0{,}415$ ($41{,}5\% \ne 0$) \quad $\rightarrow$ \textbf{No cumple}.
 \end{itemize}
-Se corrobora que el sistema cumple las especificaciones dinámicas ($PO$ y $T_s$), pero no puede anular el error estacionario debido a la ausencia de acción integral.
+Se cumplen $PO$ y $T_s$, pero no el error estacionario, porque no hay acción integral.
 
 \begin{figure}[H]
     \centering
@@ -115,15 +115,15 @@ La etapa de ganancia de la Fig. 1 corresponde a un amplificador no inversor, cuy
     k_p = 1 + \frac{R_7}{R_9} \implies \frac{R_7}{R_9} = k_p - 1 = 0{,}41
 \end{equation}
 
-Buscando entre los valores de la serie E24 dentro de una misma década, el par que mejor aproxima ese cociente es:
+Entre los valores de la serie E24, el par que mejor aproxima ese cociente es:
 \begin{equation}
     R_7 = 1{,}6\text{ k}\Omega \quad\text{y}\quad R_9 = 3{,}9\text{ k}\Omega
 \end{equation}
-obteniéndose una ganancia real de:
+que da
 \begin{equation}
     k_{p,\text{com}} = 1 + \frac{1{,}6\text{ k}\Omega}{3{,}9\text{ k}\Omega} = 1 + \frac{16}{39} \approx 1{,}41026
 \end{equation}
-La diferencia frente a la ganancia de diseño $k_p = 1{,}41$ es de apenas $0{,}00026$ (un error relativo de $0{,}018\%$).
+La diferencia con $k_p = 1{,}41$ es de $0{,}00026$ ($0{,}018\%$).
 
 Con este valor de $k_p$, la función de transferencia a lazo cerrado resulta:
 \begin{equation}
@@ -131,7 +131,7 @@ Con este valor de $k_p$, la función de transferencia a lazo cerrado resulta:
 \end{equation}
 cuyos polos se ubican en $s_{1,2} = -156{,}4 \pm j 163{,}8\text{ rad/s}$, con factor de amortiguamiento $\xi = 0{,}6906$.
 
-Se recalculan las medidas de desempeño mediante \texttt{stepinfo} y se comparan con las especificaciones de diseño en el Cuadro \ref{tab:punto3_metricas}.
+Las medidas recalculadas con \texttt{stepinfo} se comparan con las especificaciones en el Cuadro \ref{tab:punto3_metricas}.
 
 \begin{table}[H]
     \centering
@@ -139,7 +139,7 @@ Se recalculan las medidas de desempeño mediante \texttt{stepinfo} y se comparan
     \vspace{2mm}
     \begin{tabular}{lcccc}
         \toprule
-        \textbf{Métrica} & \textbf{Requerido} & \textbf{Teórico ($k_p = 1{,}4100$)} & \textbf{E24 ($k_p = 1{,}4103$)} & \textbf{Cumple} \\
+        \textbf{Métrica} & \textbf{Requerido} & \textbf{$k_p = 1{,}4100$} & \textbf{E24: $k_p = 1{,}4103$} & \textbf{Cumple} \\
         \midrule
         Sobrepaso ($PO$) & $\le 5\%$ & $4{,}979\%$ & $4{,}981\%$ & Sí \\
         Tiempo de estab. ($T_s$) & $\le 0{,}10\text{ s}$ & $26{,}47\text{ ms}$ & $26{,}47\text{ ms}$ & Sí \\
@@ -151,12 +151,12 @@ Se recalculan las medidas de desempeño mediante \texttt{stepinfo} y se comparan
     \label{tab:punto3_metricas}
 \end{table}
 
-Se comprueba que la ligera elevación de ganancia comercial ($k_p = 1{,}4103$ frente a $1{,}4100$) eleva el sobrepaso en apenas un $0{,}002\%$ ($PO = 4{,}981\%$). Dado que $4{,}981\% \le 5{,}000\%$, la especificación de sobrepaso \textbf{se sigue cumpliendo} estrictamente con los valores comerciales de la serie E24.
+El pequeño aumento de $k_p$ ($1{,}4103$ contra $1{,}4100$) sube el sobrepaso a $4{,}981\%$, que sigue por debajo del $5\%$: con los valores E24 la especificación \textbf{se sigue cumpliendo}.
 
 
 \subsection*{Punto 4. Simulación circuital del lazo cerrado en Simscape}
 
-Se implementa el circuito completo de la Fig. 2 en Simscape (\texttt{TP\_Lab2\_TL081.slx}) tomando como base el modelo validado en el Trabajo de Laboratorio 1. Los tres amplificadores operacionales ($U_{1A}$, $U_{3A}$ y $U_{2A}$) se configuran con el bloque \textit{Band-Limited Op-Amp} utilizando los parámetros del TL081 de la Tabla A0 del Anexo (ganancia $A = 2\cdot 10^5$, saturación en $\pm 8{,}5\text{ V}$, $SR = 13\text{ V}/\mu\text{s}$ y $BW = 15\text{ Hz}$), e incorporando las resistencias comerciales obtenidas en el Punto 3 ($R_7 = 1{,}6\text{ k}\Omega$ y $R_9 = 3{,}9\text{ k}\Omega$). La simulación se ejecuta con el solver \texttt{ode23t} y un paso máximo limitado a $10\ \mu\text{s}$.
+Se implementa el circuito completo de la Fig. 2 en Simscape (\texttt{TP\_Lab2\_TL081.slx}) partiendo del modelo del Laboratorio 1. Los tres amplificadores operacionales ($U_{1A}$, $U_{3A}$ y $U_{2A}$) se configuran con el bloque \textit{Band-Limited Op-Amp} utilizando los parámetros del TL081 de la Tabla A0 del Anexo (ganancia $A = 2\cdot 10^5$, saturación en $\pm 8{,}5\text{ V}$, $SR = 13\text{ V}/\mu\text{s}$ y $BW = 15\text{ Hz}$), e incorporando las resistencias comerciales obtenidas en el Punto 3 ($R_7 = 1{,}6\text{ k}\Omega$ y $R_9 = 3{,}9\text{ k}\Omega$). La simulación se ejecuta con el solver \texttt{ode23t} y un paso máximo limitado a $10\ \mu\text{s}$.
 
 En la Fig. \ref{fig:punto4_simscape} se superponen la respuesta temporal simulada en Simscape y la del modelo lineal por función de transferencia $T(s)$ ante una entrada escalón unitario.
 
@@ -167,23 +167,23 @@ En la Fig. \ref{fig:punto4_simscape} se superponen la respuesta temporal simulad
     \label{fig:punto4_simscape}
 \end{figure}
 
-Ambas curvas resultan visualmente indistinguibles. Cuantificando la diferencia instantánea mediante interpolación numérica, el error máximo obtenido es:
+Las dos curvas no se distinguen. Interpolando la simulación en los mismos instantes que el modelo, el error máximo es:
 \begin{equation}
     \max_t |y_{\text{Simscape}}(t) - y_{\text{FT}}(t)| = 1{,}71 \cdot 10^{-5}\text{ V} \approx 0{,}017\text{ mV}
 \end{equation}
-lo que ratifica una correspondencia prácticamente exacta entre el comportamiento circuital y el modelo teórico.
+es decir, el circuito reproduce el modelo.
 
 En el Cuadro \ref{tab:punto4_comparacion} se resumen las medidas de desempeño calculadas con \texttt{stepinfo} a partir de los datos simulados y se contrastan con las del modelo lineal.
 
 \begin{table}[H]
     \centering
-    \caption{Comparación entre el modelo por función de transferencia y la simulación circuital en Simscape con op-amps reales TL081.}
+    \caption{Comparación entre el modelo por función de transferencia (con los valores E24) y la simulación en Simscape con TL081.}
     \vspace{2mm}
     \begin{tabular}{lcccc}
         \toprule
         \textbf{Métrica} & \textbf{Requerido} & \textbf{Modelo FT} & \textbf{Simscape (TL081)} & \textbf{Cumple} \\
         \midrule
-        Sobrepaso ($PO$) & $\le 5\%$ & $4{,}979\%$ & $4{,}981\%$ & Sí \\
+        Sobrepaso ($PO$) & $\le 5\%$ & $4{,}981\%$ & $4{,}981\%$ & Sí \\
         Tiempo de estab. ($T_s$) & $\le 0{,}10\text{ s}$ & $26{,}47\text{ ms}$ & $26{,}47\text{ ms}$ & Sí \\
         Tiempo de pico ($T_p$) & -- & $19{,}1\text{ ms}$ & $19{,}2\text{ ms}$ & -- \\
         Valor final ($y_\infty$) & $1{,}00\text{ V}$ & $0{,}5851\text{ V}$ & $0{,}5851\text{ V}$ & -- \\
@@ -193,13 +193,13 @@ En el Cuadro \ref{tab:punto4_comparacion} se resumen las medidas de desempeño c
     \label{tab:punto4_comparacion}
 \end{table}
 
-Dado que para un escalón de $1\text{ V}$ las tensiones nodales no se aproximan a la saturación ($\pm 8{,}5\text{ V}$) ni la pendiente de las transiciones es limitada por el \textit{slew rate}, los amplificadores operan plenamente en su régimen lineal, convalidando de manera directa las predicciones del modelo por función de transferencia.
+Con un escalón de $1\text{ V}$ las tensiones quedan lejos de la saturación ($\pm 8{,}5\text{ V}$) y el \textit{slew rate} no limita, así que los operacionales trabajan en zona lineal y el modelo por función de transferencia vale.
 
 \newpage
 
 \section*{Segunda parte: Control proporcional-integral}
 
-Se implementa un controlador proporcional-integral (PI) para intentar satisfacer simultáneamente las tres especificaciones de diseño en lazo cerrado:
+Se diseña un controlador PI para intentar cumplir las mismas tres especificaciones:
 \begin{itemize}
     \item $PO \le 5\%$
     \item $T_s \le 0{,}10\text{ s}$ (criterio del $2\%$)
@@ -230,7 +230,7 @@ Reemplazando los valores numéricos ($\tau_1 \tau_2 = 4{,}7\times 10^{-5}\text{ 
     4{,}7\times 10^{-5} s^3 + 0{,}0147 s^2 + (1 + k_p) s + k_i = 0
 \end{equation}
 
-Construyendo la tabla de Routh-Hurwitz para este polinomio de tercer orden:
+La tabla de Routh es:
 \begin{table}[H]
 \centering
 \begin{tabular}{c | c c}
@@ -262,7 +262,7 @@ Evaluando el factor numérico:
 \begin{equation}
     \frac{\tau_1 + \tau_2}{\tau_1 \tau_2} = \frac{0{,}0147}{4{,}7\times 10^{-5}} \approx 312{,}77\text{ rad/s}
 \end{equation}
-Por ende, las condiciones necesarias y suficientes para la estabilidad en lazo cerrado son:
+Las condiciones de estabilidad son:
 \begin{equation}
     k_i > 0 \quad \text{y} \quad k_i < 312{,}77 \cdot (1 + k_p)
 \end{equation}
@@ -276,7 +276,7 @@ Es decir, para cada $k_p$ existe un valor máximo de la ganancia integral $k_i$;
     \begin{equation}
         \xi \ge \frac{-\ln(0{,}05)}{\sqrt{\pi^2 + \ln^2(0{,}05)}} \approx 0{,}69
     \end{equation}
-    Esto delimita en el plano complejo un cono admisible con semiángulo respecto al eje real negativo de:
+    Los polos tienen que quedar dentro de un sector con semiángulo, medido desde el eje real negativo, de
     \begin{equation}
         \theta = \arccos(0{,}69) \approx 46{,}4^\circ
     \end{equation}
@@ -299,7 +299,7 @@ La función de lazo abierto $L(s) = k_p \frac{s + z}{s(\tau_1 s + 1)(\tau_2 s + 
 \begin{equation}
     \phi_k = \frac{(2k + 1) \cdot 180^\circ}{n - m} = \frac{(2k + 1) \cdot 180^\circ}{2} \implies \phi_0 = 90^\circ, \quad \phi_1 = 270^\circ \equiv -90^\circ
 \end{equation}
-Dado que los ángulos son exactamente $\pm 90^\circ$, las asíntotas son \textbf{estrictamente verticales} (perpendiculares al eje real). Su punto de partida sobre el eje real es el centro de asíntotas:
+Las asíntotas son verticales y parten del centro
 \begin{equation}
     \sigma_a = \frac{\sum \text{polos} - \sum \text{ceros}}{n - m} = \frac{(0 - 100 - 212{,}77) - (-z)}{2} = \frac{z - 312{,}77}{2}
 \end{equation}
@@ -310,21 +310,21 @@ Para que las asíntotas queden a la izquierda de la cota $\text{Re}(s) = -40\tex
 \end{equation}
 
 \subsubsection*{2.c. Elección de la posición del cero $z$ y diseño preliminar}
-Para la elección del cero $z$, si bien cualquier valor en el intervalo $0 < z < 232{,}77\text{ rad/s}$ cumple formalmente la condición del centroide de asíntotas ($\sigma_a < -40\text{ rad/s}$), la distribución de las ramas del Lugar de las Raíces sobre el eje real impone una restricción de diseño fundamental:
+Cualquier $z$ entre $0$ y $232{,}77\text{ rad/s}$ cumple la condición de las asíntotas, pero la forma del lugar de raíces sobre el eje real cambia según el cero quede a la derecha o a la izquierda de $-100$:
 \begin{itemize}
     \item \textbf{Descarte de $z < 100\text{ rad/s}$:} En esta región, el segmento $[-z,\, 0]$ pertenece al Lugar de las Raíces. La rama que parte del polo en el origen ($s = 0$) termina en el cero en $s = -z$ sobre el eje real, dejando un polo real de lazo cerrado entre $0$ y $-z$. El par complejo (que nace de $-100$ y $-212{,}77$) puede llevarse igual a $\xi = 0{,}69$, pero el polo real queda más cerca del eje imaginario y pasa a ser el dominante: la respuesta se vuelve más lenta y deja de valer la aproximación de segundo orden con la que se fijó $\xi$. Por ejemplo, con $z = 50\text{ rad/s}$ y el par en $\xi = 0{,}69$ ($k_p \approx 1{,}36$) el polo real queda en $-35{,}9\text{ rad/s}$ y $T_s = 80\text{ ms}$; para valores menores de $z$ el polo lento se acerca más al origen y no se cumple $T_s \le 0{,}10\text{ s}$.
-    \item \textbf{Elección con $z \ge 100\text{ rad/s}$:} En este caso, el segmento del eje real que pertenece al Lugar de las Raíces es $[-100,\, 0]$. Las dos ramas que parten de $0$ y $-100\text{ rad/s}$ colisionan en un punto de ruptura y emergen al plano complejo, constituyendo el par complejo dominante con el amortiguamiento deseado. A su vez, la rama que parte del polo en $-212{,}77\text{ rad/s}$ termina en el cero en $-z$, confinando el polo real a la izquierda de $-z$, donde decae rápidamente sin distorsionar la dinámica del par complejo.
+    \item \textbf{Elección con $z \ge 100\text{ rad/s}$:} En este caso, el segmento del eje real que pertenece al Lugar de las Raíces es $[-100,\, 0]$. Las dos ramas que parten de $0$ y $-100\text{ rad/s}$ colisionan en un punto de ruptura y emergen al plano complejo, constituyendo el par complejo dominante con el amortiguamiento deseado. A su vez, la rama que parte del polo en $-212{,}77\text{ rad/s}$ termina en el cero en $-z$, así que el polo real queda a la izquierda de $-z$ y decae rápido sin afectar mucho al par complejo.
 \end{itemize}
 
 \textbf{Alternativa de cancelación ($z = 100\text{ rad/s}$):} con $z = 100$ el cero cancela el polo de la planta en $-100\text{ rad/s}$ y el lazo queda de segundo orden (polos en $0$ y $-212{,}77$, $T_s \approx 38\text{ ms}$). Se descartó porque con componentes comerciales y sus tolerancias la cancelación nunca es exacta, y se prefirió un diseño que no dependa de ella.
 
-Por ello, para satisfacer simultáneamente la cota de las asíntotas ($\sigma_a < -40\text{ rad/s} \implies z < 232{,}77\text{ rad/s}$) y asegurar que el par complejo domine la dinámica sin depender de cancelaciones algebraicas, se adopta:
+Por eso se elige un $z$ algo mayor que $100$, que cumple la cota de las asíntotas y no depende de una cancelación:
 \begin{equation}
     z = 120\text{ rad/s}
 \end{equation}
-Con este valor, el centro de las asíntotas se sitúa en $\sigma_a = (120 - 312{,}77)/2 = -96{,}38\text{ rad/s} \ll -40\text{ rad/s}$.
+Con este valor, el centro de las asíntotas se sitúa en $\sigma_a = (120 - 312{,}77)/2 = -96{,}38\text{ rad/s} < -40\text{ rad/s}$.
 
-Trazando el Lugar de las Raíces con $z = 120\text{ rad/s}$ en MATLAB (Figura \ref{fig:pi_lgr}) y mediante la selección interactiva sobre la cota de amortiguamiento $\xi = 0{,}69$, se obtiene la ganancia inicial:
+Con el lugar de raíces para $z = 120\text{ rad/s}$ (Figura \ref{fig:pi_lgr}) y seleccionando el punto sobre $\xi = 0{,}69$ se obtiene:
 \begin{equation}
     k_p \approx 0{,}84 \implies k_i = k_p \cdot z = 0{,}84 \times 120 \approx 100{,}8\text{ rad/s}
 \end{equation}
@@ -341,33 +341,33 @@ con polos en lazo cerrado en:
 \end{figure}
 
 \subsubsection*{2.d. Efecto del cero en lazo cerrado y ajuste de $k_p$}
-La evaluación de la respuesta al escalón con $k_p = 0{,}84$ arroja:
+La respuesta al escalón con $k_p = 0{,}84$ da:
 \begin{itemize}
     \item $PO = 6{,}79\% > 5\%$ \quad $\rightarrow$ \textbf{No cumple}.
     \item $T_s = 48{,}9\text{ ms} \le 100\text{ ms}$ \quad $\rightarrow$ \textbf{Cumple}.
     \item $e_{ss} = 0$ \quad $\rightarrow$ \textbf{Cumple}.
 \end{itemize}
 
-\textbf{Causa del sobrepaso adicional:} La función de transferencia de lazo cerrado es:
+\textbf{Por qué aumenta el sobrepaso.} La función de transferencia de lazo cerrado es:
 \begin{equation}
     T(s) = \frac{k_p(s + z)}{\tau_1\tau_2 s^3 + (\tau_1+\tau_2)s^2 + (1+k_p)s + k_i}
 \end{equation}
-El cero del controlador en $s = -z = -120\text{ rad/s}$ se conserva en el numerador de la transferencia de lazo cerrado. Como se vio en clase, agregar un cero a un sistema de segundo orden aumenta el sobrepaso y acelera la subida, y el efecto es mayor cuanto más cerca está el cero de los polos dominantes: los ceros no cambian los modos de la respuesta, pero sí el peso relativo de cada uno. En este caso el cero ($-120\text{ rad/s}$) está a una distancia comparable a la de los polos dominantes ($|s_{1,2}| \approx 122\text{ rad/s}$), por lo que su efecto es apreciable: el $PO$ sube de $4{,}99\%$ (segundo orden sin cero con $\xi = 0{,}69$) a $6{,}79\%$. La Figura \ref{fig:pi_efecto_cero} muestra la comparación temporal entre el prototipo puro de segundo orden y el sistema real.
+El cero del controlador en $s = -z = -120\text{ rad/s}$ se conserva en el numerador de la transferencia de lazo cerrado. Como se vio en clase, agregar un cero a un sistema de segundo orden aumenta el sobrepaso y acelera la subida, y el efecto es mayor cuanto más cerca está el cero de los polos dominantes: los ceros no cambian los modos de la respuesta, pero sí el peso relativo de cada uno. En este caso el cero ($-120\text{ rad/s}$) está a una distancia comparable a la de los polos dominantes ($|s_{1,2}| \approx 122\text{ rad/s}$), por lo que su efecto es apreciable: el $PO$ sube de $4{,}98\%$ (segundo orden sin cero con $\xi = 0{,}69$) a $6{,}79\%$. La Figura \ref{fig:pi_efecto_cero} compara ambas respuestas.
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.75\textwidth]{figuras/pi_punto2_efecto_cero.png}
-    \caption{Efecto del cero de lazo cerrado en $s = -120\text{ rad/s}$ sobre la respuesta al escalón y compensación mediante el ajuste fino de ganancia a $k_p = 0{,}73$.}
+    \caption{Efecto del cero de lazo cerrado en $s = -120\text{ rad/s}$ sobre la respuesta al escalón y respuesta con $k_p$ ajustado a $0{,}73$.}
     \label{fig:pi_efecto_cero}
 \end{figure}
 
-\textbf{Compensación de la ganancia:} Para reducir el sobrepaso por debajo del $5\%$, se realiza un ajuste fino iterativo disminuyendo progresivamente la ganancia sobre el Lugar de las Raíces. Se comprueba empíricamente que con:
+\textbf{Ajuste de $k_p$.} Para bajar el sobrepaso del $5\%$ se fue reduciendo $k_p$ sobre el lugar de raíces. Con
 \begin{equation}
     k_p = 0{,}73 \implies k_i = 0{,}73 \times 120 = 87{,}6\text{ rad/s}
 \end{equation}
 el sobrepaso queda justo por debajo de la cota, con polos en $s_{1,2} \approx -81{,}2 \pm j 76{,}2\text{ rad/s}$ ($\xi \approx 0{,}729$) y $s_3 \approx -150{,}5\text{ rad/s}$. Las métricas temporales resultan:
 \begin{itemize}
-    \item $PO = 4{,}97\% \le 5\%$ \quad $\rightarrow$ \textbf{Cumple} (calza en la cota admisible).
+    \item $PO = 4{,}97\% \le 5\%$ \quad $\rightarrow$ \textbf{Cumple}.
     \item $T_s = 52{,}8\text{ ms} \le 100\text{ ms}$ \quad $\rightarrow$ \textbf{Cumple}.
     \item $e_{ss} = 0$ \quad $\rightarrow$ \textbf{Cumple}.
 \end{itemize}
@@ -379,7 +379,7 @@ El circuito de la Figura 3 corresponde a un amplificador inversor con una impeda
 \begin{equation}
     Z_f(s) = R_{PI2} + \frac{1}{C_{PI} s} = \frac{R_{PI2} C_{PI} s + 1}{C_{PI} s}
 \end{equation}
-Bajo las hipótesis de operacional ideal ($i_+ = i_- = 0$, $v_+ = v_- = 0\text{ V}$), planteando la ley de corrientes en el nodo inversor:
+Con el operacional ideal ($i_+ = i_- = 0$, $v_+ = v_- = 0\text{ V}$), planteando la ley de corrientes en el nodo inversor:
 \begin{equation}
     \frac{V_i(s)}{R_{PI1}} + \frac{V_{o1}(s)}{Z_f(s)} = 0 \implies \frac{V_{o1}(s)}{V_i(s)} = -\frac{Z_f(s)}{R_{PI1}} = -\left( \frac{R_{PI2}}{R_{PI1}} + \frac{1}{R_{PI1} C_{PI} s} \right)
 \end{equation}
@@ -387,7 +387,7 @@ Factorizando:
 \begin{equation}
     \frac{V_{o1}(s)}{V_i(s)} = -\frac{\frac{R_{PI2}}{R_{PI1}} s + \frac{1}{R_{PI1} C_{PI}}}{s}
 \end{equation}
-Queda demostrado que la etapa implementa un controlador PI inversor, con parámetros:
+La etapa es un PI con signo menos, con:
 \begin{equation}
     k_p = \frac{R_{PI2}}{R_{PI1}}, \qquad k_i = \frac{1}{R_{PI1} C_{PI}}, \qquad z = \frac{k_i}{k_p} = \frac{1}{R_{PI2} C_{PI}}
 \end{equation}
@@ -432,11 +432,11 @@ Se implementa el circuito completo de la Fig. 5 en Simscape (\texttt{TP\_Lab2\_P
     \label{fig:esquema_pi_simscape}
 \end{figure}
 
-En la Fig. \ref{fig:pi_punto4a_simscape} se superponen la respuesta temporal de Simscape y la del modelo lineal $T(s)$ con valores comerciales E24. La diferencia máxima es de solo:
+En la Fig. \ref{fig:pi_punto4a_simscape} se superponen la respuesta temporal de Simscape y la del modelo lineal $T(s)$ con valores comerciales E24. La diferencia máxima es:
 \begin{equation}
     \max_t |y_{\text{Simscape}}(t) - y_{\text{FT}}(t)| = 3{,}18 \cdot 10^{-5}\text{ V} \approx 0{,}032\text{ mV}
 \end{equation}
-lo que ratifica una concordancia casi exacta entre el circuito y el modelo lineal.
+por lo que el circuito sigue al modelo lineal.
 
 \begin{figure}[H]
     \centering
@@ -480,7 +480,7 @@ A partir de las curvas simuladas, se observa que al ingresar el escalón de $1\t
 
 La etapa inversora unitaria ($U_5$) reinvierte esta señal entregando a la planta $v_{PI}(t) = -v_{o1}(t)$, con un pico máximo medido de $+1{,}17\text{ V}$. En régimen permanente ($t \to \infty$), con la salida estabilizada en $y = 1\text{ V}$ y error nulo, la tensión del controlador se estaciona en $v_{PI} = 1{,}00\text{ V}$ ($v_{o1} = -1{,}00\text{ V}$), sostenida por la carga acumulada en el capacitor $C_{PI}$.
 
-Dado que la excursión máxima ($|v_{PI}| \le 1{,}17\text{ V}$) queda holgadamente dentro de los límites de saturación de $\pm 8{,}5\text{ V}$ del TL081, los operacionales trabajan en régimen lineal sin distorsión.
+Dado que la excursión máxima ($|v_{PI}| \le 1{,}17\text{ V}$) queda dentro de los límites de saturación de $\pm 8{,}5\text{ V}$ del TL081, los operacionales trabajan en zona lineal.
 
 \subsubsection*{4.c. Aumento de la amplitud del escalón hasta la saturación}
 
@@ -499,17 +499,18 @@ Se simuló el circuito con $A = 1\text{ V}$, $A = 7{,}30\text{ V}$ y $A = 8\text
 
 \begin{table}[H]
 \centering
+\caption{Sobrepaso y tiempo de establecimiento en función de la amplitud del escalón.}
+\vspace{2mm}
 \begin{tabular}{lccc}
-\hline
+\toprule
  & $\max v_{PI}$ [V] & $PO$ [\%] & $T_s$ [ms] \\
-\hline
+\midrule
 Modelo (FT) & -- & 4,63 & 54,7 \\
 Simscape, $A = 1\text{ V}$ & 1,17 & 4,63 & 54,7 \\
 Simscape, $A = 7{,}30\text{ V}$ & 8,50 & 4,63 & 54,7 \\
 Simscape, $A = 8\text{ V}$ & 8,50 (satura) & 3,56 & 61,6 \\
-\hline
+\bottomrule
 \end{tabular}
-\caption{Sobrepaso y tiempo de establecimiento en función de la amplitud del escalón.}
 \label{tab:pi_punto4c}
 \end{table}
 
@@ -530,16 +531,17 @@ En la Fig. \ref{fig:punto5} se superponen las respuestas al escalón unitario de
 
 \begin{table}[H]
 \centering
+\caption{Parámetros de la respuesta al escalón medidos en Simscape.}
+\vspace{2mm}
 \begin{tabular}{lccc}
-\hline
+\toprule
  & Especificación & Control P & Control PI \\
-\hline
+\midrule
 $PO$ & $\le 5\%$ & $4{,}98\%$ & $4{,}62\%$ \\
 $T_s$ (2\%) & $\le 100\text{ ms}$ & $26{,}5\text{ ms}$ & $54{,}7\text{ ms}$ \\
 $e_{ss}$ & $0$ & $41{,}5\%$ & $0\%$ \\
-\hline
+\bottomrule
 \end{tabular}
-\caption{Parámetros de la respuesta al escalón medidos en Simscape.}
 \label{tab:punto5}
 \end{table}
 
@@ -556,6 +558,6 @@ El costo de la acción integral es una respuesta más lenta: el polo en el orige
     \item Cuando la amplitud del escalón lleva $v_{PI}$ a la saturación ($A > 7{,}30\text{ V}$), el modelo lineal deja de ser válido: el sobrepaso y el tiempo de establecimiento pasan a depender de la amplitud.
 \end{itemize}
 
-Todos los cálculos y figuras de este trabajo práctico se generan ejecutando el script \texttt{TP\_Lab2.m}.
+Todos los cálculos y figuras de este trabajo práctico se generan ejecutando el Live Script \texttt{TP\_Lab2.mlx} junto con los modelos \texttt{TP\_Lab2\_TL081.slx} y \texttt{TP\_Lab2\_PI\_TL081.slx}.
 
 \end{document}

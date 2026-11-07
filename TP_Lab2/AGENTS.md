@@ -16,6 +16,7 @@
 - consigna_TP_Lab2.pdf: enunciado y anexo de Simscape (Tabla A0 con los parámetros del TL081).
 - `figuras/`: esquemas y gráficos del informe.
 - TP_Lab2.m: script único y autocontenido con todos los cálculos, diseños (P y PI) y simulaciones.
+- TP_Lab2.mlx: el mismo script convertido a Live Script (es el que se entrega, junto con los dos .slx).
 - TP_Lab2_TL081.slx: modelo circuital en Simscape con operacionales reales TL081 para el lazo con control P.
 - TP_Lab2_PI_TL081.slx: modelo circuital en Simscape con operacionales reales TL081 para el lazo con control PI.
 - TP_Lab2_GomezPizarro_Rodriguez.tex / .pdf: informe del trabajo de laboratorio.

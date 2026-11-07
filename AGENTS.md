@@ -5,7 +5,8 @@ Repositorio con los trabajos de laboratorio de la materia **Sistemas de Control*
 ## 1. Organización
 - Cada TP vive en su propia carpeta y es autocontenido: consigna, script, modelos, figuras e informe.
   - `TP_Lab1/`: Modelado de sistemas, características y medidas de desempeño. Completo.
-  - `TP_Lab2/`: Desarrollo de controladores P y PI. En curso.
+  - `TP_Lab2/`: Desarrollo de controladores P y PI. Completo.
+  - `TP_Lab3/`: Controlador atraso-adelanto. Completo (falta revisión final).
 - Cada carpeta tiene su `AGENTS.md` con el contexto de ese TP. Leerlo antes de trabajar en él.
 - Usar rutas relativas a la carpeta del TP (en MATLAB, `fileparts(mfilename('fullpath'))`). Las figuras del informe deben poder regenerarse ejecutando el script.
 - No modificar `TP_Lab1/` salvo pedido explícito.
