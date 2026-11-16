@@ -13,9 +13,6 @@ fig_dir = fullfile(script_dir, 'figuras');
 if ~exist(fig_dir, 'dir')
     mkdir(fig_dir);
 end
-% Figuras con fondo claro, independiente del tema de MATLAB (igual que en el Lab 3)
-s_cfg = settings;
-s_cfg.matlab.appearance.figure.GraphicsTheme.TemporaryValue = 'light';
 
 %% =========================================================================
 %% PUNTO 1: MODELO EN ESPACIO DE ESTADOS
@@ -174,6 +171,7 @@ fprintf('Límite de 12 V: wn = %d rad/s -> Ts = %.2f ms, |V| máx = %.2f V\n', .
     wn_barrido(idx), Ts_barrido(idx)*1e3, Vmax_barrido(idx));
 
 fig = figure('Color', 'w');
+theme(fig, 'light');   % fondo claro aunque MATLAB use tema oscuro
 subplot(2,1,1);
 plot(wn_barrido, Ts_barrido*1e3, 'LineWidth', 1.5); hold on;
 plot(wn_barrido(idx), Ts_barrido(idx)*1e3, 'o', 'MarkerSize', 7, 'LineWidth', 1.5);
@@ -201,6 +199,7 @@ fprintf('N = %.4f, Ts = %.2f ms, PO = %.2f %%, |V| máx = %.2f V\n', ...
     N_lim, info_lim.SettlingTime*1e3, info_lim.Overshoot, max(abs(V_lim)));
 
 fig = figure('Color', 'w');
+theme(fig, 'light');   % fondo claro aunque MATLAB use tema oscuro
 subplot(2,1,1);
 plot(t*1e3, theta, 'LineWidth', 1.5); hold on;
 plot(t*1e3, theta_lim, 'LineWidth', 1.5);

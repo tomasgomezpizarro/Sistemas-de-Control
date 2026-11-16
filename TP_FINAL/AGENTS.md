@@ -14,8 +14,8 @@
 - Escalón de 1 rad: Ts ≤ 50 ms, PO ≤ 5 %, ess = 0.
 
 ## 3. Entregables
-1. Script MATLAB (`TP_Final.m` / `.mlx`) que reproduzca todo; figuras en `figuras/`.
-2. Presentación de 8 a 10 diapositivas para la defensa.
+1. Script MATLAB `TP_Final.m` (se entrega .m, no .mlx) que reproduzca todo; figuras en `figuras/`.
+2. Presentación de 8 a 10 diapositivas para la defensa, en Beamer.
 
 ## 4. Puntos de la consigna
 1. Modelo con x = [θ θ̇ i]ᵀ, significado de cada estado.
