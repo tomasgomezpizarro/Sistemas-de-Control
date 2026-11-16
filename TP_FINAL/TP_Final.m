@@ -13,6 +13,9 @@ fig_dir = fullfile(script_dir, 'figuras');
 if ~exist(fig_dir, 'dir')
     mkdir(fig_dir);
 end
+% Figuras con fondo claro, independiente del tema de MATLAB (igual que en el Lab 3)
+s_cfg = settings;
+s_cfg.matlab.appearance.figure.GraphicsTheme.TemporaryValue = 'light';
 
 %% =========================================================================
 %% PUNTO 1: MODELO EN ESPACIO DE ESTADOS
@@ -118,3 +121,99 @@ theta_ss_sinN = dcgain(sys_sinN);
 ess_sinN = 1 - theta_ss_sinN;
 fprintf('Sin N: theta_ss = %.4f rad, ess = %.4f (escalón de 1 rad)\n', ...
     theta_ss_sinN, ess_sinN);
+
+%% 3.4 Ganancia de prealimentación N
+% Se escala la referencia para que theta_ss = r. Por linealidad,
+% N = 1/dcgain(sistema sin N). En este sistema da N = k1.
+Nbar = 1/dcgain(sys_sinN);
+fprintf('N = %.4f   (k1 = %.4f)\n', Nbar, Kc(1));
+
+% Lazo cerrado final: x' = (A - B K) x + B N r,  y = theta
+sys_LC = ss(A - B*Kc, B*Nbar, C, D);
+ess = 1 - dcgain(sys_LC);
+fprintf('Con N: ess = %.2g (escalón de 1 rad)\n', ess);
+
+%% =========================================================================
+%% PUNTO 4: VERIFICACIÓN
+%% =========================================================================
+disp('=== Punto 4: verificación ===');
+
+%% 4.1 Respuesta al escalón de 1 rad: theta(t) y V(t)
+t = (0:1e-5:0.1)';                   % paso chico para ver el salto de V en t = 0
+r = ones(size(t));                   % escalón de 1 rad
+[theta, t, x] = lsim(sys_LC, r, t);  % x(t): estados [theta omega i]
+V = -x*Kc.' + Nbar*r;                % ley de control V = -K x + N r
+
+info = stepinfo(theta, t, 1);        % criterio del 2 % por defecto
+fprintf('Ts = %.2f ms, PO = %.2f %%, ess = %.2g\n', ...
+    info.SettlingTime*1e3, info.Overshoot, ess);
+fprintf('|V| máx = %.3f V (en t = %.2f ms)\n', max(abs(V)), ...
+    t(find(abs(V) == max(abs(V)), 1))*1e3);
+
+%% 4.2 Menor Ts sin superar 12 V: barrido de wn
+% Se mantienen zeta = 0.8 y p3 = 10*sigma, y se aumenta wn.
+% Para cada wn se recalculan K y N, se simula el escalón y se mide Ts y max|V|.
+Vlim = 12;
+wn_barrido = 100:1:250;
+Ts_barrido = zeros(size(wn_barrido));
+Vmax_barrido = zeros(size(wn_barrido));
+for k = 1:numel(wn_barrido)
+    wn_k = wn_barrido(k);
+    sigma_k = zeta*wn_k;
+    p_k = [-sigma_k + 1j*wn_k*sqrt(1-zeta^2), -sigma_k - 1j*wn_k*sqrt(1-zeta^2), -10*sigma_k];
+    K_k = acker(A, B, p_k);
+    N_k = 1/dcgain(ss(A - B*K_k, B, C, D));
+    [th_k, ~, x_k] = lsim(ss(A - B*K_k, B*N_k, C, D), r, t);
+    Ts_barrido(k)   = stepinfo(th_k, t, 1).SettlingTime;
+    Vmax_barrido(k) = max(abs(-x_k*K_k.' + N_k*r));
+end
+
+% Mayor wn que no supera los 12 V
+idx = find(Vmax_barrido <= Vlim, 1, 'last');
+fprintf('Límite de 12 V: wn = %d rad/s -> Ts = %.2f ms, |V| máx = %.2f V\n', ...
+    wn_barrido(idx), Ts_barrido(idx)*1e3, Vmax_barrido(idx));
+
+fig = figure('Color', 'w');
+subplot(2,1,1);
+plot(wn_barrido, Ts_barrido*1e3, 'LineWidth', 1.5); hold on;
+plot(wn_barrido(idx), Ts_barrido(idx)*1e3, 'o', 'MarkerSize', 7, 'LineWidth', 1.5);
+grid on; ylabel('T_s [ms]');
+title('Barrido de \omega_n (\zeta = 0,8, p_3 = 10\sigma)');
+subplot(2,1,2);
+plot(wn_barrido, Vmax_barrido, 'LineWidth', 1.5); hold on;
+yline(Vlim, '--r', '12 V');
+plot(wn_barrido(idx), Vmax_barrido(idx), 'o', 'MarkerSize', 7, 'LineWidth', 1.5);
+grid on; xlabel('\omega_n [rad/s]'); ylabel('|V|_{máx} [V]');
+exportgraphics(fig, fullfile(fig_dir, 'punto4_barrido_wn.png'), 'Resolution', 200);
+
+%% 4.3 Comparación: diseño original (wn = 110) y diseño límite de 12 V
+wn_lim = wn_barrido(idx);
+sigma_lim = zeta*wn_lim;
+p_lim = [-sigma_lim + 1j*wn_lim*sqrt(1-zeta^2), -sigma_lim - 1j*wn_lim*sqrt(1-zeta^2), -10*sigma_lim];
+K_lim = acker(A, B, p_lim);
+N_lim = 1/dcgain(ss(A - B*K_lim, B, C, D));
+[theta_lim, ~, x_lim] = lsim(ss(A - B*K_lim, B*N_lim, C, D), r, t);
+V_lim = -x_lim*K_lim.' + N_lim*r;
+info_lim = stepinfo(theta_lim, t, 1);
+disp('Diseño límite:');
+disp('K = [k1 k2 k3]:'); disp(K_lim);
+fprintf('N = %.4f, Ts = %.2f ms, PO = %.2f %%, |V| máx = %.2f V\n', ...
+    N_lim, info_lim.SettlingTime*1e3, info_lim.Overshoot, max(abs(V_lim)));
+
+fig = figure('Color', 'w');
+subplot(2,1,1);
+plot(t*1e3, theta, 'LineWidth', 1.5); hold on;
+plot(t*1e3, theta_lim, 'LineWidth', 1.5);
+yline(1, '--k', 'HandleVisibility', 'off');
+grid on; ylabel('\theta [rad]');
+legend(sprintf('\\omega_n = %d rad/s (T_s = %.1f ms)', wn, info.SettlingTime*1e3), ...
+       sprintf('\\omega_n = %d rad/s (T_s = %.1f ms)', wn_lim, info_lim.SettlingTime*1e3), ...
+       'Location', 'southeast');
+title('Respuesta al escalón de 1 rad');
+subplot(2,1,2);
+plot(t*1e3, V, 'LineWidth', 1.5); hold on;
+plot(t*1e3, V_lim, 'LineWidth', 1.5);
+yline(Vlim, '--r', '12 V');
+ylim([-3 14]);
+grid on; xlabel('t [ms]'); ylabel('V [V]');
+exportgraphics(fig, fullfile(fig_dir, 'punto4_theta_V.png'), 'Resolution', 200);
