@@ -188,6 +188,7 @@
   \[
     K = \begin{bmatrix}k_1 & k_2 & k_3\end{bmatrix} = \begin{bmatrix}0{,}7099 & -0{,}01892 & -2{,}578\end{bmatrix}
   \]
+  \centerline{\small\texttt{K = acker(A, B, [-88+66i, -88-66i, -880])}}
   \begin{itemize}
     \item Se verifica con $\operatorname{eig}(A-BK)$: $-88\pm j\,66$ y $-880$.
     \item $k_2$ y $k_3$ son negativas: la realimentación de velocidad y corriente \emph{suma} tensión
@@ -252,6 +253,15 @@
       \small
       Se mantienen $\zeta = 0{,}8$ y $s_3 = 10\,\sigma$, y se barre $\omega_n$ de 100 a 250 rad/s.
       Para cada $\omega_n$ se recalculan $K$ y $N$, se simula y se mide $T_s$ y $|V|_{\text{máx}}$.
+
+      \vspace{0.3em}
+      {\scriptsize\ttfamily
+      for wn = 100:250\\
+      \ \ K = acker(A, B, p);\\
+      \ \ N = 1/dcgain(ss(A-B*K, B, C, D));\\
+      \ \ [th, t, x] = lsim(...);\\
+      \ \ Vmax = max(abs(-x*K.' + N*r));\\
+      end\par}
 
       \vspace{0.6em}
       \textbf{Diseño límite: $\omega_n = 185$ rad/s} (naranja en la diapo anterior)
