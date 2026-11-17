@@ -25,8 +25,24 @@
 \begin{document}
 
 % 1 -----------------------------------------------------------------------
-\begin{frame}
-  \titlepage
+\begin{frame}[plain]
+  \begin{columns}[c]
+    \begin{column}{0.5\textwidth}
+      \centering
+      {\Large \inserttitle\par}
+      \vspace{0.4em}
+      {\insertsubtitle\par}
+      \vspace{1.5em}
+      Tomás Gómez Pizarro\\Mikael Rodríguez\par
+      \vspace{1.5em}
+      {\small Sistemas de Control · FAMAF\\Proyecto parcial 2 · Variante 4 · Grupo 2\\2026\par}
+    \end{column}
+    \begin{column}{0.48\textwidth}
+      \centering
+      \includegraphics[width=\linewidth]{motor_cc_ctms.png}\\[0.2em]
+      {\tiny Esquema: CTMS, \emph{DC Motor Position: System Modeling}}
+    \end{column}
+  \end{columns}
 \end{frame}
 
 % 2 -----------------------------------------------------------------------
