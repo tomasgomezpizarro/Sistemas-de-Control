@@ -201,11 +201,11 @@
   La realimentación ubica los polos pero no asegura ganancia unitaria en continua.
 
   \vspace{0.8em}
-  \textbf{Cálculo de $N$}: en estado estacionario $\dot x = 0$,
+  \textbf{Cálculo de $N$}: el sistema es lineal, así que $N$ escala la salida:
+  $\theta_{ss} = N\,T(0)\,r$, con $T(0) = 1{,}409$.
   \[
-    0 = (A-BK)\,x_{ss} + BN\,r
-    \quad\Rightarrow\quad
-    N = \frac{-1}{C\,(A-BK)^{-1}B} = \frac{1}{T(0)}
+    e_{ss} = 0 \;\Rightarrow\; N\,T(0) = 1
+    \;\Rightarrow\; N = \frac{1}{T(0)} = \frac{1}{1{,}409} = 0{,}7099
   \]
   En MATLAB: \texttt{N = 1/dcgain(ss(A-B*K, B, C, D))}.
 
